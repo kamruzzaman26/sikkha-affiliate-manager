@@ -1,0 +1,1149 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>অ্যাফিলিয়েট প্রোডাক্ট ম্যানেজার | শিক্ষা নগরী</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --blue-950: #102a43;
+        --blue-900: #173f68;
+        --blue-800: #185c9d;
+        --blue-700: #1769aa;
+        --blue-100: #e7f2fc;
+        --blue-50: #f3f8fd;
+        --ink: #1d2939;
+        --muted: #64748b;
+        --line: #dbe5ef;
+        --surface: #fff;
+        --page: #f4f8fc;
+        --green: #157347;
+        --amber: #9a5b00;
+        --red: #b42318;
+        font-family: Inter, "Noto Sans Bengali", "Segoe UI", system-ui, sans-serif;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--page); color: var(--ink); }
+      button, input, select, textarea { font: inherit; }
+      button, label.file-button { cursor: pointer; }
+      a { color: var(--blue-800); }
+      .shell { max-width: 1440px; margin: auto; padding: 22px; }
+      .topbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+      .brand { display: flex; align-items: center; gap: 13px; }
+      .mark { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 15px; background: var(--blue-800); color: white; font-size: 19px; font-weight: 900; }
+      h1 { margin: 0; color: var(--blue-950); font-size: clamp(1.35rem, 3vw, 1.8rem); }
+      .subtitle { margin: 5px 0 0; color: var(--muted); font-size: .92rem; }
+      .top-actions, .toolbar, .filters, .button-row { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+      .button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line); border-radius: 9px; padding: 8px 13px; background: white; color: var(--blue-900); font-weight: 700; text-decoration: none; }
+      .button:hover { border-color: #9dc2e5; background: var(--blue-50); }
+      .button.primary { border-color: var(--blue-800); background: var(--blue-800); color: white; }
+      .button.primary:hover { background: var(--blue-900); }
+      .button.danger { color: var(--red); }
+      .button.small { min-height: 34px; padding: 6px 10px; font-size: .85rem; }
+      .notice { margin: 0 0 16px; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 15px; background: #eff6ff; color: #1e3a5f; font-size: .9rem; line-height: 1.65; }
+      .notice.warning { border-color: #f2d29a; background: #fff8e8; color: #6f4600; }
+      .notice.error { border-color: #f2b8b5; background: #fff1f0; color: #842018; }
+      .notice strong { color: inherit; }
+      .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+      .stat { border: 1px solid var(--line); border-radius: 13px; padding: 15px 17px; background: white; box-shadow: 0 2px 6px #173f6809; }
+      .stat-label { color: var(--muted); font-size: .86rem; }
+      .stat-value { margin-top: 5px; color: var(--blue-950); font-size: 1.6rem; font-weight: 850; }
+      .panel { border: 1px solid var(--line); border-radius: 14px; background: white; box-shadow: 0 4px 16px #173f6808; }
+      .import-panel { margin-bottom: 16px; padding: 17px; }
+      .panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+      h2 { margin: 0; color: var(--blue-950); font-size: 1.08rem; }
+      .helper { margin: 5px 0 0; color: var(--muted); font-size: .86rem; line-height: 1.55; }
+      .bulk-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; margin-top: 14px; }
+      .url-list { width: 100%; min-height: 82px; resize: vertical; }
+      .toolbar-panel { margin-bottom: 16px; padding: 14px; }
+      .toolbar { justify-content: space-between; }
+      .filters { margin-top: 12px; }
+      .field-control { min-height: 40px; width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; background: white; color: var(--ink); }
+      .filters .field-control { width: auto; min-width: 150px; }
+      .filters .search { flex: 1 1 240px; min-width: 190px; }
+      .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 12px; }
+      table { width: 100%; border-collapse: collapse; text-align: left; }
+      th, td { padding: 11px 12px; border-bottom: 1px solid #e8eef5; vertical-align: middle; }
+      th { position: sticky; top: 0; z-index: 1; background: #f4f8fc; color: #43566c; font-size: .82rem; white-space: nowrap; }
+      td { font-size: .89rem; }
+      tbody tr:last-child td { border-bottom: 0; }
+      .product-name { min-width: 190px; font-weight: 750; color: var(--blue-950); }
+      .muted { color: var(--muted); }
+      .pill { display: inline-flex; align-items: center; border-radius: 99px; padding: 4px 9px; background: var(--blue-100); color: var(--blue-900); font-size: .75rem; font-weight: 750; white-space: nowrap; }
+      .pill.green { background: #e8f7ed; color: var(--green); }
+      .pill.amber { background: #fff4d8; color: var(--amber); }
+      .pill.red { background: #feeeee; color: var(--red); }
+      .row-actions { display: flex; flex-wrap: wrap; gap: 6px; min-width: 150px; }
+      .external-link { display: inline-block; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+      .empty { padding: 42px 18px; text-align: center; color: var(--muted); }
+      .pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 2px 0; color: var(--muted); font-size: .88rem; }
+      .image-preview { display: flex; align-items: center; gap: 12px; min-height: 64px; }
+      .image-preview img { width: 54px; height: 64px; border: 1px solid var(--line); border-radius: 7px; object-fit: cover; background: var(--blue-50); }
+      .image-preview img[hidden] { display: none; }
+      .image-state { color: var(--muted); font-size: .82rem; }
+      dialog { width: min(940px, calc(100vw - 24px)); max-height: 92vh; overflow: auto; border: 1px solid var(--line); border-radius: 15px; padding: 0; color: var(--ink); box-shadow: 0 24px 80px #102a4350; }
+      dialog::backdrop { background: #102a4370; }
+      .dialog-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding: 16px 20px; background: white; }
+      .dialog-body { padding: 18px 20px; }
+      .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px 15px; }
+      .form-field { min-width: 0; }
+      .form-field.wide { grid-column: 1 / -1; }
+      .form-field label { display: block; margin-bottom: 5px; color: #34465b; font-size: .84rem; font-weight: 720; }
+      .form-field .field-control { min-height: 42px; }
+      textarea.field-control { min-height: 86px; resize: vertical; }
+      .required { color: var(--red); }
+      .checkbox-label { display: flex !important; align-items: center; gap: 8px; font-weight: 600 !important; }
+      .editor-footer { position: sticky; bottom: 0; display: flex; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding: 13px 20px; background: white; }
+      .validation-list { margin: 12px 0 0; padding-left: 20px; line-height: 1.65; }
+      .import-preview { max-height: 46vh; overflow: auto; margin: 12px 0; }
+      .import-preview table { font-size: .84rem; }
+      .import-preview th, .import-preview td { padding: 8px; }
+      .file-input { display: none; }
+      .footer-note { margin: 17px 2px 0; color: var(--muted); font-size: .82rem; line-height: 1.6; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+      @media (max-width: 780px) {
+        .shell { padding: 14px; }
+        .topbar { flex-direction: column; }
+        .top-actions { width: 100%; }
+        .top-actions .button { flex: 1; }
+        .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+        .stat { padding: 12px; }
+        .stat-value { font-size: 1.35rem; }
+        .bulk-grid { grid-template-columns: 1fr; }
+        .bulk-grid .button { width: 100%; }
+        .filters .field-control { flex: 1 1 145px; }
+        .toolbar { align-items: stretch; }
+        .toolbar > .button-row { width: 100%; }
+        .toolbar > .button-row .button { flex: 1; }
+        .table-wrap { overflow: visible; border: 0; background: transparent; }
+        table, tbody, tr, td { display: block; width: 100%; }
+        thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        tbody { display: grid; gap: 10px; }
+        tbody tr { border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px; background: white; box-shadow: 0 2px 6px #173f6808; }
+        tbody td { display: grid; grid-template-columns: minmax(105px, 36%) minmax(0, 1fr); gap: 9px; padding: 8px 0; border-bottom: 1px solid #edf1f6; overflow-wrap: anywhere; }
+        tbody td::before { content: attr(data-label); color: var(--muted); font-size: .8rem; font-weight: 700; }
+        tbody td:last-child { border-bottom: 0; }
+        .product-name, .row-actions { min-width: 0; }
+        .row-actions { justify-content: flex-start; }
+        .external-link { max-width: 100%; }
+        .pagination { align-items: flex-start; flex-direction: column; }
+        .pagination .button-row { width: 100%; }
+        .pagination .button { flex: 1; }
+        .form-grid { grid-template-columns: 1fr; }
+        .form-field.wide { grid-column: auto; }
+        .dialog-body { padding: 15px; }
+        .dialog-head, .editor-footer { padding-right: 15px; padding-left: 15px; }
+      }
+
+      @media (max-width: 390px) {
+        .shell { padding: 10px; }
+        .mark { width: 42px; height: 42px; }
+        .top-actions { display: grid; grid-template-columns: 1fr 1fr; }
+        .top-actions .button { font-size: .83rem; }
+        .filters .field-control { min-width: 125px; }
+        tbody td { grid-template-columns: 100px minmax(0, 1fr); }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true">শি</div>
+          <div>
+            <h1>অ্যাফিলিয়েট প্রোডাক্ট ম্যানেজার</h1>
+            <p class="subtitle">শিক্ষা নগরী · Local catalog workspace</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="button" id="backup-button" type="button">JSON backup</button>
+          <label class="button file-button" for="restore-file">Backup restore<input class="file-input" id="restore-file" type="file" accept=".json,application/json"></label>
+          <button class="button primary" id="add-button" type="button">＋ পণ্য যোগ করুন</button>
+        </div>
+      </header>
+
+      <div class="notice warning">
+        <strong>শুধু এই browser/device-এ সংরক্ষিত:</strong> তথ্য localStorage-এ থাকে; অন্য device বা user-এর সঙ্গে sync হয় না। নিয়মিত JSON backup রাখুন। এই tool কোনো database-এ লিখে না। Affiliate URL আপনাকে affiliate platform থেকে আলাদাভাবে আনতে হবে—মূল URL স্বয়ংক্রিয়ভাবে affiliate URL-এ রূপান্তরিত হয় না।
+      </div>
+      <div class="notice" id="integration-notice">
+        <strong>সাইটে যুক্ত করার আগে:</strong> এই local catalog সরাসরি Sikkha Nogori checkout বা Supabase-এ পাঠায় না। Affiliate-only পণ্যকে own-inventory/checkout থেকে আলাদা রাখুন। বিদ্যমান schema-তে image URL, original product URL, previous price, availability, SKU, SEO, tags ও verification status-এর field নেই; export আগে field mapping পর্যালোচনা করুন।
+      </div>
+      <div id="toast" class="notice" role="status" aria-live="polite" hidden></div>
+
+      <section class="stats" aria-label="ক্যাটালগ সারাংশ">
+        <div class="stat"><div class="stat-label">মোট পণ্য</div><div class="stat-value" id="stat-total">0</div></div>
+        <div class="stat"><div class="stat-label">যাচাইকৃত</div><div class="stat-value" id="stat-verified">0</div></div>
+        <div class="stat"><div class="stat-label">পর্যালোচনা দরকার</div><div class="stat-value" id="stat-review">0</div></div>
+        <div class="stat"><div class="stat-label">Draft</div><div class="stat-value" id="stat-draft">0</div></div>
+      </section>
+
+      <section class="panel import-panel" aria-labelledby="bulk-heading">
+        <div class="panel-heading">
+          <div>
+            <h2 id="bulk-heading">বাল্ক URL সংগ্রহ ও তথ্য Import</h2>
+            <p class="helper">একাধিক original product URL দিন—প্রতি লাইনে একটি। Fetch কেবল browser-এর অনুমোদিত CORS অনুরোধ; access control বা anti-bot বাধা অতিক্রম করা হয় না।</p>
+          </div>
+          <button class="button" id="fetch-button" type="button">তথ্য সংগ্রহ</button>
+        </div>
+        <div class="bulk-grid">
+          <label>
+            <span class="sr-only">এক বা একাধিক original product URL</span>
+            <textarea class="field-control url-list" id="bulk-urls" placeholder="https://shop.example.com/product/one&#10;https://shop.example.com/product/two"></textarea>
+          </label>
+          <button class="button" id="bulk-add-button" type="button">URL-গুলো Draft হিসেবে যোগ করুন</button>
+        </div>
+        <div class="button-row" style="margin-top:12px">
+          <label class="button file-button" for="import-file">CSV / JSON Import<input class="file-input" id="import-file" type="file" accept=".csv,.json,text/csv,application/json"></label>
+          <button class="button" id="validate-all-button" type="button">সব পণ্যের validation report</button>
+        </div>
+        <div id="fetch-report" class="helper" role="status" aria-live="polite" style="margin-top:10px"></div>
+      </section>
+
+      <section class="panel toolbar-panel" aria-label="পণ্য ব্যবস্থাপনা">
+        <div class="toolbar">
+          <div>
+            <h2>পণ্যের তালিকা</h2>
+            <p class="helper" id="result-count">0টি পণ্য</p>
+          </div>
+          <div class="button-row">
+            <button class="button small" id="export-csv-button" type="button">CSV Export</button>
+            <button class="button small" id="export-json-button" type="button">JSON Export</button>
+          </div>
+        </div>
+        <div class="filters">
+          <input class="field-control search" id="search-input" type="search" placeholder="নাম, brand, original বা affiliate URL খুঁজুন" aria-label="পণ্য খুঁজুন">
+          <select class="field-control" id="filter-category" aria-label="Category filter"><option value="">সব category</option></select>
+          <select class="field-control" id="filter-brand" aria-label="Brand filter"><option value="">সব brand</option></select>
+          <select class="field-control" id="filter-type" aria-label="Product type filter"><option value="">সব product type</option><option value="affiliate">Affiliate</option><option value="own_inventory">Own inventory</option></select>
+          <select class="field-control" id="filter-status" aria-label="Verification status filter"><option value="">সব data status</option><option value="pending">Pending</option><option value="verified">Verified</option><option value="needs_review">Needs review</option></select>
+          <select class="field-control" id="sort-select" aria-label="Sort products">
+            <option value="name-asc">নাম: A → Z</option><option value="name-desc">নাম: Z → A</option>
+            <option value="price-asc">দাম: কম আগে</option><option value="price-desc">দাম: বেশি আগে</option>
+            <option value="verified-desc">যাচাইয়ের তারিখ: নতুন আগে</option><option value="verified-asc">যাচাইয়ের তারিখ: পুরোনো আগে</option>
+          </select>
+          <select class="field-control" id="page-size" aria-label="প্রতি পাতায় পণ্য"><option value="10">১০ / পাতা</option><option value="25">২৫ / পাতা</option><option value="50">৫০ / পাতা</option></select>
+        </div>
+      </section>
+
+      <section aria-label="পণ্য তালিকা">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>পণ্য</th><th>Brand / Category</th><th>ধরন</th><th>দাম</th><th>Data status</th><th>Publication</th><th>Original URL</th><th>Affiliate URL</th><th>সতর্কতা</th><th>কাজ</th></tr></thead>
+            <tbody id="product-rows"></tbody>
+          </table>
+          <div class="empty" id="empty-state">এখনো কোনো পণ্য নেই। একটি পণ্য যোগ করুন অথবা CSV/JSON import করুন।</div>
+        </div>
+        <div class="pagination">
+          <span id="page-label">পাতা ১ / ১</span>
+          <div class="button-row">
+            <button class="button small" id="previous-page" type="button">← আগের</button>
+            <button class="button small" id="next-page" type="button">পরের →</button>
+          </div>
+        </div>
+      </section>
+
+      <p class="footer-note">Import/export-এ UTF-8 Bengali text রাখা হয়। Automatic fetch CORS বা website policy-তে ব্যর্থ হতে পারে; তখন manual entry বা import করুন। `target="_blank"` affiliate preview link-এ `rel="sponsored nofollow noopener noreferrer"` ব্যবহার হয়।</p>
+    </main>
+
+    <dialog id="product-dialog" aria-labelledby="editor-title">
+      <form id="product-form" novalidate>
+        <div class="dialog-head">
+          <div><h2 id="editor-title">পণ্য যোগ করুন</h2><p class="helper">Required চিহ্নিত field পূরণ করুন। অজানা তথ্য খালি থাকতে পারে।</p></div>
+          <button class="button small" type="button" id="close-editor">বন্ধ</button>
+        </div>
+        <div class="dialog-body">
+          <input id="record-id" type="hidden">
+          <div class="form-grid" id="form-grid">
+            <div class="form-field"><label for="productName">Product name <span class="required">*</span></label><input class="field-control" id="productName" name="productName" maxlength="240" required></div>
+            <div class="form-field"><label for="brandName">Brand name</label><input class="field-control" id="brandName" name="brandName" maxlength="160"></div>
+            <div class="form-field wide">
+              <label for="imageUrl">Image URL</label><input class="field-control" id="imageUrl" name="imageUrl" type="url" placeholder="https://...">
+              <div class="image-preview" style="margin-top:8px"><img id="image-preview" alt="পণ্যের ছবির preview" hidden><span class="image-state" id="image-state">ছবির preview এখানে দেখাবে।</span></div>
+            </div>
+            <div class="form-field"><label for="originalProductUrl">Original product URL <span class="required">*</span></label><input class="field-control" id="originalProductUrl" name="originalProductUrl" type="url" required placeholder="https://..."></div>
+            <div class="form-field"><label for="affiliateUrl">Affiliate URL <span class="muted">(পরবর্তীতে যোগ করা যাবে)</span></label><input class="field-control" id="affiliateUrl" name="affiliateUrl" type="url" placeholder="Affiliate platform থেকে কপি করুন"></div>
+            <div class="form-field"><label for="category">Category</label><input class="field-control" id="category" name="category" maxlength="120"></div>
+            <div class="form-field"><label for="subcategory">Subcategory</label><input class="field-control" id="subcategory" name="subcategory" maxlength="120"></div>
+            <div class="form-field"><label for="currentPrice">Current price</label><input class="field-control" id="currentPrice" name="currentPrice" inputmode="decimal" placeholder="খালি রাখা যাবে"></div>
+            <div class="form-field"><label for="currency">Currency</label><input class="field-control" id="currency" name="currency" maxlength="8" placeholder="BDT"></div>
+            <div class="form-field"><label for="previousPrice">Previous price <span class="muted">(যাচাইকৃত হলে)</span></label><input class="field-control" id="previousPrice" name="previousPrice" inputmode="decimal"></div>
+            <div class="form-field"><label for="availability">Availability</label><select class="field-control" id="availability" name="availability"><option value="unknown">Unknown</option><option value="in_stock">In stock</option><option value="out_of_stock">Out of stock</option></select></div>
+            <div class="form-field wide"><label for="shortDescription">Short description</label><textarea class="field-control" id="shortDescription" name="shortDescription" maxlength="2000"></textarea></div>
+            <div class="form-field"><label for="author">Author <span class="muted">(বই)</span></label><input class="field-control" id="author" name="author" maxlength="200"></div>
+            <div class="form-field"><label for="publisher">Publisher <span class="muted">(বই)</span></label><input class="field-control" id="publisher" name="publisher" maxlength="200"></div>
+            <div class="form-field"><label for="sku">SKU / product ID</label><input class="field-control" id="sku" name="sku" maxlength="160"></div>
+            <div class="form-field"><label for="slug">Unique slug <span class="required">*</span></label><input class="field-control" id="slug" name="slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxlength="160" placeholder="product-name"></div>
+            <div class="form-field"><label for="seoTitle">SEO title</label><input class="field-control" id="seoTitle" name="seoTitle" maxlength="200"></div>
+            <div class="form-field"><label for="sourceWebsite">Source website</label><input class="field-control" id="sourceWebsite" name="sourceWebsite" maxlength="255" placeholder="shop.example.com"></div>
+            <div class="form-field wide"><label for="seoDescription">SEO description</label><textarea class="field-control" id="seoDescription" name="seoDescription" maxlength="320"></textarea></div>
+            <div class="form-field"><label for="tags">Tags / keywords <span class="muted">(কমা দিয়ে লিখুন)</span></label><input class="field-control" id="tags" name="tags" placeholder="শিক্ষা, বই"></div>
+            <div class="form-field"><label for="lastVerifiedDate">Last verified date</label><input class="field-control" id="lastVerifiedDate" name="lastVerifiedDate" type="date"></div>
+            <div class="form-field"><label for="dataStatus">Data status</label><select class="field-control" id="dataStatus" name="dataStatus"><option value="pending">Pending</option><option value="verified">Verified</option><option value="needs_review">Needs review</option></select></div>
+            <div class="form-field"><label for="publicationStatus">Publication status</label><select class="field-control" id="publicationStatus" name="publicationStatus"><option value="draft">Draft</option><option value="published">Published</option></select></div>
+            <div class="form-field"><label for="productType">Product type</label><select class="field-control" id="productType" name="productType"><option value="affiliate">Affiliate</option><option value="own_inventory">Own inventory</option></select></div>
+            <div class="form-field wide"><p class="helper">এই standalone tool database allowlist পড়তে পারে না। বর্তমান প্রজেক্টে Rokomari entry host `rkmri.co` ও 10 Minute School host `10ms.io` অনুমোদিত; অন্য host হলে database-এ আলাদাভাবে অনুমোদন না হওয়া পর্যন্ত link সংরক্ষণ করা যাবে না।</p></div>
+          </div>
+          <div class="notice error" id="form-errors" role="alert" hidden></div>
+        </div>
+        <div class="editor-footer">
+          <button class="button danger" id="delete-from-editor" type="button" hidden>পণ্য মুছুন</button>
+          <div class="button-row" style="margin-left:auto"><button class="button" id="cancel-editor" type="button">বাতিল</button><button class="button primary" type="submit">সংরক্ষণ</button></div>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="import-dialog" aria-labelledby="import-title">
+      <div class="dialog-head"><div><h2 id="import-title">Import preview ও validation</h2><p class="helper" id="import-summary"></p></div><button class="button small" id="close-import" type="button">বন্ধ</button></div>
+      <div class="dialog-body">
+        <div class="notice warning">বিদ্যমান পণ্যের সঙ্গে মিললে default-এ সেই row skip হবে। কোনো record overwrite করা হয় না। Duplicate row নতুন record হিসেবে যোগ করতে চাইলে নিচের checkbox আলাদাভাবে নির্বাচন করুন।</div>
+        <label class="checkbox-label"><input id="import-duplicates" type="checkbox"> Duplicate হিসেবে চিহ্নিত row-ও নতুন record হিসেবে যোগ করুন (কোনো overwrite হবে না)</label>
+        <div class="import-preview"><table><thead><tr><th>Row</th><th>Product name</th><th>Validation</th></tr></thead><tbody id="import-rows"></tbody></table></div>
+        <div id="import-errors" class="notice error" hidden></div>
+      </div>
+      <div class="editor-footer"><span id="import-count" class="helper"></span><div class="button-row"><button class="button" id="cancel-import" type="button">বাতিল</button><button class="button primary" id="confirm-import" type="button">Valid row import</button></div></div>
+    </dialog>
+
+    <dialog id="report-dialog" aria-labelledby="report-title">
+      <div class="dialog-head"><div><h2 id="report-title">Validation report</h2><p class="helper" id="report-summary"></p></div><button class="button small" id="close-report" type="button">বন্ধ</button></div>
+      <div class="dialog-body" id="report-body"></div>
+      <div class="editor-footer"><span></span><button class="button primary" id="report-ok" type="button">ঠিক আছে</button></div>
+    </dialog>
+
+    <script>
+      (() => {
+        "use strict";
+
+        const STORAGE_KEY = "sikkhaNogoriAffiliateProducts.v1";
+        const FIELDS = [
+          "productName", "brandName", "imageUrl", "originalProductUrl", "affiliateUrl",
+          "category", "subcategory", "currentPrice", "currency", "previousPrice",
+          "shortDescription", "author", "publisher", "availability", "sku", "slug",
+          "seoTitle", "seoDescription", "tags", "sourceWebsite", "lastVerifiedDate",
+          "dataStatus", "publicationStatus", "productType",
+        ];
+        const CSV_HEADERS = [
+          ["productName", "product_name", "book_title"], ["brandName", "brand_name"], ["imageUrl", "image_url"],
+          ["originalProductUrl", "original_product_url", "product_url"], ["affiliateUrl", "affiliate_url"],
+          ["category"], ["subcategory"], ["currentPrice", "current_price", "price"],
+          ["currency"], ["previousPrice", "previous_price"], ["shortDescription", "short_description", "description"],
+          ["author"], ["publisher"], ["availability"], ["sku", "product_id"], ["slug"],
+          ["seoTitle", "seo_title"], ["seoDescription", "seo_description"], ["tags", "keywords"],
+          ["sourceWebsite", "source_website"], ["lastVerifiedDate", "last_verified_date"],
+          ["dataStatus", "data_status"], ["publicationStatus", "publication_status"],
+          ["productType", "product_type"],
+        ];
+        const JSON_ALIASES = Object.fromEntries(FIELDS.map((field, index) => [field, CSV_HEADERS[index]]));
+        const APPROVED_AFFILIATE_HOSTS = new Set(["rkmri.co", "10ms.io"]);
+        const $ = (id) => document.getElementById(id);
+        const editor = $("product-dialog");
+        const importDialog = $("import-dialog");
+        const reportDialog = $("report-dialog");
+        let products = loadProducts();
+        let currentPage = 1;
+        let pendingImport = [];
+        let toastTimer;
+        let fetchBusy = false;
+        let brokenImageUrls = new Set();
+
+        function emptyProduct() {
+          return {
+            productName: "", brandName: "", imageUrl: "", originalProductUrl: "", affiliateUrl: "",
+            category: "", subcategory: "", currentPrice: "", currency: "", previousPrice: "",
+            shortDescription: "", author: "", publisher: "", availability: "unknown", sku: "",
+            slug: "", seoTitle: "", seoDescription: "", tags: "", sourceWebsite: "",
+            lastVerifiedDate: "", dataStatus: "pending", publicationStatus: "draft",
+            productType: "affiliate",
+          };
+        }
+
+        function loadProducts() {
+          try {
+            const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+            if (!Array.isArray(parsed)) throw new Error("Stored catalog is not a list.");
+            return parsed.map(normalizeProduct).filter(Boolean);
+          } catch (error) {
+            console.error("Could not load local catalog.", error);
+            return [];
+          }
+        }
+
+        function normalizeProduct(input) {
+          if (!input || typeof input !== "object" || Array.isArray(input)) return null;
+          const item = emptyProduct();
+          for (const field of FIELDS) {
+            const alias = JSON_ALIASES[field].find((key) => Object.hasOwn(input, key));
+            const value = input[field] ?? (alias ? input[alias] : undefined);
+            if (value !== undefined && value !== null && ["string", "number"].includes(typeof value)) {
+              item[field] = String(value);
+            }
+          }
+          item.availability = ({ "in stock": "in_stock", "out of stock": "out_of_stock" })[item.availability.toLowerCase()] || item.availability;
+          item.productType = item.productType === "own-inventory" ? "own_inventory" : item.productType;
+          item.availability = ["in_stock", "out_of_stock", "unknown"].includes(item.availability) ? item.availability : "unknown";
+          item.dataStatus = ["pending", "verified", "needs_review"].includes(item.dataStatus) ? item.dataStatus : "pending";
+          item.publicationStatus = ["draft", "published"].includes(item.publicationStatus) ? item.publicationStatus : "draft";
+          item.productType = ["affiliate", "own_inventory"].includes(item.productType) ? item.productType : "affiliate";
+          item.id = typeof input.id === "string" && input.id ? input.id : makeId();
+          return item;
+        }
+
+        function makeId() {
+          return globalThis.crypto?.randomUUID?.() || `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+        }
+
+        function persist() {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+            render();
+            return true;
+          } catch (error) {
+            console.error("Could not save local catalog.", error);
+            showToast("Browser storage-এ সংরক্ষণ করা যায়নি। Storage quota দেখুন বা JSON backup নিন।", "error");
+            return false;
+          }
+        }
+
+        function showToast(message, type = "info") {
+          const toast = $("toast");
+          toast.hidden = false;
+          toast.className = `notice ${type === "error" ? "error" : type === "warning" ? "warning" : ""}`;
+          toast.textContent = message;
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => { toast.hidden = true; }, 6500);
+        }
+
+        function asUrl(value, { httpsOnly = false, allowedHosts = null, disallowCurrentOrigin = false } = {}) {
+          const raw = typeof value === "string" ? value.trim() : "";
+          if (!raw || raw.length > 2048) return null;
+          try {
+            const url = new URL(raw);
+            if (!["http:", "https:"].includes(url.protocol) || (httpsOnly && url.protocol !== "https:") ||
+                url.username || url.password || url.port) return null;
+            if (allowedHosts && !allowedHosts.has(url.hostname.toLowerCase())) return null;
+            if (disallowCurrentOrigin && url.origin === location.origin) return null;
+            return url;
+          } catch {
+            return null;
+          }
+        }
+
+        function canonicalUrl(value) {
+          const url = asUrl(value);
+          if (!url) return "";
+          url.hash = "";
+          if (url.pathname.length > 1) url.pathname = url.pathname.replace(/\/+$/, "");
+          return url.href;
+        }
+
+        function canonicalName(value) {
+          return String(value || "").normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase();
+        }
+
+        function findDuplicates(product, exceptId = "") {
+          const url = canonicalUrl(product.originalProductUrl);
+          const name = canonicalName(product.productName);
+          return products.filter((existing) => existing.id !== exceptId &&
+            ((url && url === canonicalUrl(existing.originalProductUrl)) ||
+             (name && name === canonicalName(existing.productName))));
+        }
+
+        function warnings(product, { skipDuplicate = false } = {}) {
+          const result = [];
+          if (!product.productName.trim()) result.push("Product name নেই");
+          if (!asUrl(product.originalProductUrl)) result.push("Original product URL অবৈধ/খালি");
+          if (!product.slug.trim() || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(product.slug)) result.push("Slug অবৈধ/খালি");
+          if (product.imageUrl && !asUrl(product.imageUrl)) result.push("Image URL অবৈধ");
+          if (product.affiliateUrl) {
+            if (!asUrl(product.affiliateUrl, { httpsOnly: true })) result.push("Affiliate URL অবশ্যই HTTPS হতে হবে");
+            else if (!APPROVED_AFFILIATE_HOSTS.has(asUrl(product.affiliateUrl).hostname.toLowerCase())) result.push("Affiliate host বর্তমান site allowlist-এ নেই");
+          } else if (product.productType === "affiliate" && product.publicationStatus === "published") {
+            result.push("প্রকাশিত affiliate পণ্যের Affiliate URL নেই");
+          }
+          if (product.currentPrice && (!Number.isFinite(Number(product.currentPrice)) || Number(product.currentPrice) < 0)) result.push("Current price অবৈধ");
+          if (product.previousPrice && (!Number.isFinite(Number(product.previousPrice)) || Number(product.previousPrice) < 0)) result.push("Previous price অবৈধ");
+          if (product.productType === "own_inventory" && product.publicationStatus === "published" && !product.currentPrice) result.push("প্রকাশিত own-inventory পণ্যের price নেই");
+          if (product.publicationStatus === "published" && product.dataStatus !== "verified") result.push("যাচাই না হওয়া data প্রকাশিত হিসেবে চিহ্নিত");
+          if (!product.brandName.trim()) result.push("Brand name নেই");
+          if (!product.category.trim()) result.push("Category নেই");
+          if (!product.currentPrice) result.push("Price নেই");
+          if (!product.imageUrl.trim()) result.push("Image নেই");
+          if (!product.shortDescription.trim()) result.push("Description নেই");
+          if (product.availability === "unknown") result.push("Availability অজানা");
+          if (!product.lastVerifiedDate) result.push("Last verified date নেই");
+          if (product.productType === "affiliate" && !product.affiliateUrl) result.push("Affiliate URL এখনো যোগ করা হয়নি");
+          if (!skipDuplicate) {
+            const duplicates = findDuplicates(product, product.id || "");
+            if (duplicates.length) result.push(`সম্ভাব্য duplicate: ${duplicates.map((item) => item.productName || item.slug).join(", ")}`);
+          }
+          if (brokenImageUrls.has(canonicalUrl(product.imageUrl))) result.push("Image load ব্যর্থ হয়েছে");
+          return result;
+        }
+
+        function displayPrice(value, currency) {
+          if (!value) return "—";
+          return `${value} ${currency || ""}`.trim();
+        }
+
+        function appendCell(row, label, content, className = "") {
+          const cell = document.createElement("td");
+          cell.dataset.label = label;
+          if (className) cell.className = className;
+          if (content instanceof Node) cell.append(content);
+          else cell.textContent = content;
+          row.append(cell);
+          return cell;
+        }
+
+        function addExternalLink(cell, value, affiliate = false) {
+          const url = asUrl(value, { httpsOnly: affiliate });
+          if (!url) { cell.textContent = value ? "অবৈধ URL" : "—"; return; }
+          const link = document.createElement("a");
+          link.href = value;
+          link.target = "_blank";
+          link.rel = affiliate ? "sponsored nofollow noopener noreferrer" : "noopener noreferrer";
+          link.referrerPolicy = "no-referrer";
+          link.textContent = value;
+          link.className = "external-link";
+          link.title = value;
+          cell.replaceChildren(link);
+        }
+
+        function fillFilter(select, values, placeholder) {
+          const selected = select.value;
+          select.replaceChildren(new Option(placeholder, ""));
+          [...values].filter(Boolean).sort((a, b) => a.localeCompare(b, "bn")).forEach((value) => select.add(new Option(value, value)));
+          if ([...select.options].some((option) => option.value === selected)) select.value = selected;
+        }
+
+        function getVisibleProducts() {
+          const query = $("search-input").value.trim().toLocaleLowerCase();
+          const category = $("filter-category").value;
+          const brand = $("filter-brand").value;
+          const type = $("filter-type").value;
+          const status = $("filter-status").value;
+          const rows = products.filter((item) => {
+            const haystack = [item.productName, item.brandName, item.originalProductUrl, item.affiliateUrl].join(" ").toLocaleLowerCase();
+            return (!query || haystack.includes(query)) && (!category || item.category === category) &&
+              (!brand || item.brandName === brand) && (!type || item.productType === type) &&
+              (!status || item.dataStatus === status);
+          });
+          const sort = $("sort-select").value;
+          rows.sort((a, b) => {
+            if (sort.startsWith("name")) return (a.productName || "").localeCompare(b.productName || "", "bn") * (sort.endsWith("desc") ? -1 : 1);
+            if (sort.startsWith("price")) {
+              const av = Number(a.currentPrice) || 0, bv = Number(b.currentPrice) || 0;
+              return (av - bv) * (sort.endsWith("desc") ? -1 : 1);
+            }
+            const av = a.lastVerifiedDate || "", bv = b.lastVerifiedDate || "";
+            return av.localeCompare(bv) * (sort.endsWith("desc") ? -1 : 1);
+          });
+          return rows;
+        }
+
+        function render() {
+          $("stat-total").textContent = String(products.length);
+          $("stat-verified").textContent = String(products.filter((item) => item.dataStatus === "verified").length);
+          $("stat-review").textContent = String(products.filter((item) => item.dataStatus === "needs_review").length);
+          $("stat-draft").textContent = String(products.filter((item) => item.publicationStatus === "draft").length);
+          fillFilter($("filter-category"), new Set(products.map((item) => item.category)), "সব category");
+          fillFilter($("filter-brand"), new Set(products.map((item) => item.brandName)), "সব brand");
+
+          const rows = getVisibleProducts();
+          const pageSize = Number($("page-size").value);
+          const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+          currentPage = Math.min(currentPage, pageCount);
+          const start = (currentPage - 1) * pageSize;
+          const pageRows = rows.slice(start, start + pageSize);
+          const body = $("product-rows");
+          body.replaceChildren();
+          $("result-count").textContent = `${rows.length}টি পণ্য · মোট ${products.length}টি`;
+          $("empty-state").hidden = pageRows.length > 0;
+          $("page-label").textContent = `পাতা ${currentPage} / ${pageCount}`;
+          $("previous-page").disabled = currentPage <= 1;
+          $("next-page").disabled = currentPage >= pageCount;
+
+          for (const product of pageRows) {
+            const row = document.createElement("tr");
+            const name = appendCell(row, "পণ্য", product.productName || "(নাম নেই)", "product-name");
+            if (product.slug) {
+              const slug = document.createElement("small");
+              slug.className = "muted";
+              slug.textContent = product.slug;
+              name.append(document.createElement("br"), slug);
+            }
+            appendCell(row, "Brand / Category", [product.brandName, product.category, product.subcategory].filter(Boolean).join(" · ") || "—");
+            const typeCell = appendCell(row, "ধরন", "");
+            const typePill = document.createElement("span");
+            typePill.className = "pill";
+            typePill.textContent = product.productType === "affiliate" ? "Affiliate" : "Own inventory";
+            typeCell.append(typePill);
+            appendCell(row, "দাম", displayPrice(product.currentPrice, product.currency));
+            const statusCell = appendCell(row, "Data status", "");
+            const statusPill = document.createElement("span");
+            statusPill.className = `pill ${product.dataStatus === "verified" ? "green" : product.dataStatus === "needs_review" ? "amber" : ""}`;
+            statusPill.textContent = product.dataStatus.replace("_", " ");
+            statusCell.append(statusPill);
+            appendCell(row, "Publication", product.publicationStatus);
+            const original = appendCell(row, "Original URL", "");
+            addExternalLink(original, product.originalProductUrl);
+            const affiliate = appendCell(row, "Affiliate URL", "");
+            addExternalLink(affiliate, product.affiliateUrl, true);
+            const warningCell = appendCell(row, "সতর্কতা", "");
+            const issueList = warnings(product);
+            if (issueList.length) {
+              const badge = document.createElement("span");
+              badge.className = `pill ${issueList.some((item) => item.includes("অবৈধ") || item.includes("duplicate")) ? "red" : "amber"}`;
+              badge.textContent = `${issueList.length}টি`;
+              badge.title = issueList.join(" · ");
+              warningCell.append(badge);
+            } else {
+              warningCell.textContent = "—";
+            }
+            const actions = document.createElement("div");
+            actions.className = "row-actions";
+            const edit = document.createElement("button");
+            edit.className = "button small";
+            edit.type = "button";
+            edit.textContent = "Edit";
+            edit.addEventListener("click", () => openEditor(product));
+            const duplicate = document.createElement("button");
+            duplicate.className = "button small";
+            duplicate.type = "button";
+            duplicate.textContent = "Duplicate";
+            duplicate.addEventListener("click", () => duplicateProduct(product));
+            const remove = document.createElement("button");
+            remove.className = "button small danger";
+            remove.type = "button";
+            remove.textContent = "Delete";
+            remove.addEventListener("click", () => deleteProduct(product.id));
+            actions.append(edit, duplicate, remove);
+            appendCell(row, "কাজ", actions);
+            body.append(row);
+          }
+        }
+
+        function slugify(value) {
+          const slug = String(value || "").normalize("NFKD").toLowerCase()
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 145);
+          if (slug) return slug;
+          return `product-${Date.now().toString(36).slice(-7)}`;
+        }
+
+        function uniqueSlug(base, exceptId = "") {
+          let slug = base || slugify("product");
+          let suffix = 2;
+          while (products.some((item) => item.id !== exceptId && item.slug === slug)) slug = `${base || "product"}-${suffix++}`;
+          return slug;
+        }
+
+        function setForm(product) {
+          $("record-id").value = product?.id || "";
+          for (const field of FIELDS) {
+            const control = $(field);
+            if (control) control.value = product?.[field] ?? emptyProduct()[field] ?? "";
+          }
+          $("form-errors").hidden = true;
+          updateImagePreview();
+          $("delete-from-editor").hidden = !product;
+        }
+
+        function openEditor(product = null) {
+          $("editor-title").textContent = product ? "পণ্য সম্পাদনা" : "পণ্য যোগ করুন";
+          setForm(product);
+          editor.showModal();
+        }
+
+        function readForm() {
+          const item = emptyProduct();
+          for (const field of FIELDS) {
+            const control = $(field);
+            if (control) item[field] = control.value;
+          }
+          item.id = $("record-id").value || makeId();
+          return item;
+        }
+
+        function validateForSave(item, exceptId = "") {
+          const errors = [];
+          if (!item.productName.trim()) errors.push("Product name আবশ্যক।");
+          if (!asUrl(item.originalProductUrl)) errors.push("Original product URL বৈধ HTTP/HTTPS URL হতে হবে।");
+          if (!item.slug.trim() || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)) errors.push("Slug ছোট ইংরেজি অক্ষর/সংখ্যা ও hyphen-এ unique হতে হবে।");
+          if (products.some((existing) => existing.id !== exceptId && existing.slug === item.slug)) errors.push("এই slug আগে থেকেই আছে।");
+          if (item.imageUrl && !asUrl(item.imageUrl)) errors.push("Image URL বৈধ HTTP/HTTPS URL হতে হবে।");
+          if (item.affiliateUrl) {
+            if (!asUrl(item.affiliateUrl, { httpsOnly: true })) errors.push("Affiliate URL বৈধ HTTPS URL হতে হবে; credentials বা custom port গ্রহণযোগ্য নয়।");
+            else if (!APPROVED_AFFILIATE_HOSTS.has(asUrl(item.affiliateUrl).hostname.toLowerCase())) {
+              errors.push("Affiliate host বিদ্যমান allowlist-এ নেই। এই standalone tool থেকে allowlist bypass করা যাবে না।");
+            }
+          }
+          for (const [label, value] of [["Current price", item.currentPrice], ["Previous price", item.previousPrice]]) {
+            if (value && (!/^\d+(?:\.\d{1,2})?$/.test(value) || !Number.isFinite(Number(value)))) errors.push(`${label} শূন্য বা তার বেশি সংখ্যা হতে হবে (সর্বোচ্চ ২ decimal)।`);
+          }
+          if (item.productType === "own_inventory" && item.publicationStatus === "published" && !item.currentPrice) errors.push("প্রকাশিত own-inventory পণ্যের Current price আবশ্যক।");
+          if (item.productType === "affiliate" && item.publicationStatus === "published" && !item.affiliateUrl) errors.push("প্রকাশিত affiliate পণ্যের Affiliate URL আবশ্যক।");
+          if (item.publicationStatus === "published" && item.dataStatus !== "verified") errors.push("অযাচাইকৃত পণ্য প্রকাশ করতে হলে আগে তথ্য যাচাই করে Data status = verified করুন।");
+          const duplicates = findDuplicates(item, exceptId);
+          if (duplicates.length) errors.push(`সম্ভাব্য duplicate পাওয়া গেছে: ${duplicates.map((value) => value.productName).join(", ")}। আগে তালিকা যাচাই করুন।`);
+          return errors;
+        }
+
+        function saveForm(event) {
+          event.preventDefault();
+          const item = readForm();
+          const id = $("record-id").value;
+          const errors = validateForSave(item, id);
+          if (errors.length) {
+            const box = $("form-errors");
+            box.replaceChildren();
+            const list = document.createElement("ul");
+            list.className = "validation-list";
+            errors.forEach((message) => { const li = document.createElement("li"); li.textContent = message; list.append(li); });
+            box.append(list);
+            box.hidden = false;
+            return;
+          }
+          const index = products.findIndex((existing) => existing.id === id);
+          if (index >= 0) products[index] = item;
+          else products.unshift(item);
+          if (persist()) {
+            editor.close();
+            showToast(index >= 0 ? "পণ্য হালনাগাদ হয়েছে।" : "পণ্য যোগ হয়েছে।");
+          }
+        }
+
+        function duplicateProduct(product) {
+          const copy = { ...product, id: makeId(), productName: `${product.productName} (copy)`, slug: uniqueSlug(`${product.slug}-copy`), dataStatus: "needs_review", publicationStatus: "draft", lastVerifiedDate: "" };
+          openEditor(copy);
+          $("record-id").value = "";
+          $("editor-title").textContent = "পণ্যের কপি সম্পাদনা";
+        }
+
+        function deleteProduct(id) {
+          const item = products.find((product) => product.id === id);
+          if (!item || !confirm(`“${item.productName}” পণ্যটি local catalog থেকে মুছবেন?`)) return;
+          products = products.filter((product) => product.id !== id);
+          if (persist()) showToast("পণ্য মুছে ফেলা হয়েছে।");
+        }
+
+        function valueForField(product, field) {
+          return product[field] ?? "";
+        }
+
+        function csvEscape(value) {
+          const text = String(value ?? "");
+          return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+        }
+
+        function download(filename, content, type) {
+          const blob = new Blob([content], { type });
+          const url = URL.createObjectURL(blob);
+          const anchor = document.createElement("a");
+          anchor.href = url;
+          anchor.download = filename;
+          document.body.append(anchor);
+          anchor.click();
+          anchor.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function exportCsv() {
+          const header = FIELDS;
+          const lines = [header.map(csvEscape).join(",")];
+          for (const product of products) lines.push(header.map((field) => csvEscape(valueForField(product, field))).join(","));
+          download("sikkha-nogori-products.csv", `\uFEFF${lines.join("\r\n")}`, "text/csv;charset=utf-8");
+          showToast(`${products.length}টি পণ্য UTF-8 CSV হিসেবে export হয়েছে।`);
+        }
+
+        function exportJson(filename = "sikkha-nogori-products.json") {
+          const data = products.map((product) => Object.fromEntries(FIELDS.map((field) => [field, product[field] ?? ""])));
+          download(filename, `${JSON.stringify(data, null, 2)}\n`, "application/json;charset=utf-8");
+          showToast(`${products.length}টি পণ্য JSON হিসেবে export হয়েছে।`);
+        }
+
+        function parseCsv(text) {
+          const rows = [];
+          let row = [], cell = "", quoted = false;
+          const source = text.replace(/^\uFEFF/, "");
+          for (let i = 0; i < source.length; i++) {
+            const char = source[i];
+            if (quoted) {
+              if (char === '"' && source[i + 1] === '"') { cell += '"'; i++; }
+              else if (char === '"') quoted = false;
+              else cell += char;
+            } else if (char === '"' && cell === "") quoted = true;
+            else if (char === ",") { row.push(cell); cell = ""; }
+            else if (char === "\n" || char === "\r") {
+              if (char === "\r" && source[i + 1] === "\n") i++;
+              row.push(cell); cell = "";
+              if (row.some((value) => value !== "")) rows.push(row);
+              row = [];
+            } else cell += char;
+          }
+          if (quoted) throw new Error("CSV-তে closing quote নেই।");
+          row.push(cell);
+          if (row.some((value) => value !== "")) rows.push(row);
+          if (!rows.length) return [];
+          const headerIndex = new Map(rows[0].map((value, index) => [value.trim().toLowerCase(), index]));
+          return rows.slice(1).map((cells) => {
+            const item = emptyProduct();
+            for (let index = 0; index < FIELDS.length; index++) {
+              const sourceHeader = CSV_HEADERS[index].find((candidate) => headerIndex.has(candidate.toLowerCase()));
+              if (sourceHeader) item[FIELDS[index]] = cells[headerIndex.get(sourceHeader.toLowerCase())] ?? "";
+            }
+            return item;
+          });
+        }
+
+        function parseImport(text, filename) {
+          if (filename.toLowerCase().endsWith(".json") || /^[\s\uFEFF]*[\[{]/.test(text)) {
+            const parsed = JSON.parse(text.replace(/^\uFEFF/, ""));
+            const list = Array.isArray(parsed) ? parsed : parsed?.products;
+            if (!Array.isArray(list)) throw new Error("JSON-এ products array অথবা product array দিতে হবে।");
+            return list.map(normalizeProduct).filter(Boolean).map(({ id, ...item }) => item);
+          }
+          return parseCsv(text);
+        }
+
+        function rowIssues(item, staged) {
+          const result = [];
+          if (!item.productName.trim()) result.push("Required: Product name নেই");
+          if (!asUrl(item.originalProductUrl)) result.push("অবৈধ: Original URL খালি বা ভুল");
+          if (item.imageUrl && !asUrl(item.imageUrl)) result.push("অবৈধ: Image URL");
+          if (item.affiliateUrl && !asUrl(item.affiliateUrl, { httpsOnly: true })) result.push("অবৈধ: Affiliate URL");
+          else if (item.affiliateUrl && !APPROVED_AFFILIATE_HOSTS.has(asUrl(item.affiliateUrl).hostname.toLowerCase())) result.push("অবৈধ: Affiliate host allowlist-এ নেই");
+          if (item.currentPrice && (!/^\d+(?:\.\d{1,2})?$/.test(item.currentPrice) || Number(item.currentPrice) < 0)) result.push("অবৈধ: Current price");
+          if (item.previousPrice && (!/^\d+(?:\.\d{1,2})?$/.test(item.previousPrice) || Number(item.previousPrice) < 0)) result.push("অবৈধ: Previous price");
+          if (!item.slug) item.slug = uniqueSlug(slugify(item.productName));
+          if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(item.slug)) result.push("অবৈধ: Slug format");
+          if (products.some((existing) => existing.slug === item.slug)) result.push("অবৈধ: Slug আগে থেকেই আছে");
+          if (staged.some((existing) => existing.slug === item.slug)) result.push("অবৈধ: Import batch-এ slug duplicate");
+          if (products.some((existing) => findDuplicates(item).some((duplicate) => duplicate.id === existing.id)) ||
+              staged.some((existing) => canonicalUrl(existing.originalProductUrl) === canonicalUrl(item.originalProductUrl) ||
+                canonicalName(existing.productName) === canonicalName(item.productName))) result.push("সম্ভাব্য duplicate");
+          if (item.productType === "affiliate" && !item.affiliateUrl) result.push("Missing: Affiliate URL (Draft হিসেবে চলবে)");
+          if (item.productType === "own_inventory" && item.publicationStatus === "published" && !item.currentPrice) result.push("Required: প্রকাশিত Own inventory price নেই");
+          if (!item.brandName.trim()) result.push("Missing: Brand name");
+          if (!item.category.trim()) result.push("Missing: Category");
+          if (!item.currentPrice) result.push("Missing: Current price");
+          if (!item.imageUrl.trim()) result.push("Missing: Image URL");
+          if (!item.shortDescription.trim()) result.push("Missing: Short description");
+          if (!item.lastVerifiedDate) result.push("Missing: Last verified date");
+          return result;
+        }
+
+        function duplicateOnly(messages) {
+          return messages.length > 0 && messages.every((message) => message === "সম্ভাব্য duplicate" || message.startsWith("Affiliate URL নেই"));
+        }
+
+        function openImportPreview(items) {
+          pendingImport = items.map((item) => ({ ...emptyProduct(), ...item, id: undefined }));
+          const staged = [];
+          const body = $("import-rows");
+          body.replaceChildren();
+          let valid = 0, duplicateCount = 0, invalid = 0;
+          pendingImport.forEach((item, index) => {
+            const messages = rowIssues(item, staged);
+            const isDuplicate = messages.includes("সম্ভাব্য duplicate");
+            const fatal = messages.some((message) => message.startsWith("Required:") || message.startsWith("অবৈধ:"));
+            if (fatal) invalid++;
+            else if (isDuplicate) duplicateCount++;
+            else valid++;
+            if (!fatal) staged.push(item);
+            const tr = document.createElement("tr");
+            const rowCell = document.createElement("td"); rowCell.textContent = String(index + 1);
+            const nameCell = document.createElement("td"); nameCell.textContent = item.productName || "(নাম নেই)";
+            const issueCell = document.createElement("td");
+            issueCell.textContent = messages.length ? messages.join(" · ") : "প্রাথমিক যাচাই ঠিক";
+            tr.append(rowCell, nameCell, issueCell);
+            body.append(tr);
+          });
+          $("import-summary").textContent = `${pendingImport.length}টি row · import করা যাবে ${valid + duplicateCount}টি · invalid ${invalid}টি · duplicate ${duplicateCount}টি`;
+          $("import-count").textContent = `নতুন: ${valid} · duplicate: ${duplicateCount} · বাদ: ${invalid}`;
+          $("confirm-import").disabled = valid + duplicateCount === 0;
+          $("import-duplicates").checked = false;
+          $("import-errors").hidden = true;
+          importDialog.showModal();
+        }
+
+        function confirmImport() {
+          const staged = [];
+          let added = 0, duplicateSkipped = 0, invalid = 0;
+          for (const source of pendingImport) {
+            const item = { ...source, id: makeId() };
+            const messages = rowIssues(item, staged);
+            const duplicate = messages.includes("সম্ভাব্য duplicate");
+            const fatal = messages.some((message) => message.startsWith("Required:") || message.startsWith("অবৈধ:"));
+            if (fatal) { invalid++; continue; }
+            if (duplicate && !$("import-duplicates").checked) { duplicateSkipped++; continue; }
+            if (!item.currency && item.currentPrice) item.currency = "BDT";
+            item.publicationStatus = item.publicationStatus === "published" && item.dataStatus === "verified" ? "published" : "draft";
+            if (item.productType === "affiliate" && !item.affiliateUrl) item.publicationStatus = "draft";
+            staged.push(item);
+            added++;
+          }
+          if (added) {
+            products = [...staged, ...products];
+            persist();
+          }
+          importDialog.close();
+          showToast(`Import সম্পন্ন: ${added}টি যোগ, ${duplicateSkipped}টি duplicate বাদ, ${invalid}টি invalid বাদ।`, invalid ? "warning" : "info");
+        }
+
+        function updateImagePreview() {
+          const raw = $("imageUrl").value;
+          const preview = $("image-preview");
+          const state = $("image-state");
+          const url = asUrl(raw);
+          preview.onerror = () => {
+            preview.hidden = true;
+            state.textContent = "ছবি load হয়নি—URL/host পরীক্ষা করুন।";
+            state.className = "image-state";
+            if (url) brokenImageUrls.add(canonicalUrl(url.href));
+          };
+          preview.onload = () => {
+            preview.hidden = false;
+            state.textContent = "ছবি preview সফল।";
+            state.className = "image-state";
+            if (url) brokenImageUrls.delete(canonicalUrl(url.href));
+          };
+          if (!raw) {
+            preview.removeAttribute("src");
+            preview.hidden = true;
+            state.textContent = "ছবির preview এখানে দেখাবে।";
+          } else if (!url) {
+            preview.removeAttribute("src");
+            preview.hidden = true;
+            state.textContent = "অবৈধ image URL: বৈধ HTTP/HTTPS URL দিন।";
+            state.className = "image-state";
+          } else {
+            preview.referrerPolicy = "no-referrer";
+            preview.hidden = false;
+            state.textContent = "ছবি লোড হচ্ছে…";
+            preview.src = url.href;
+          }
+        }
+
+        function extractMetadata(documentNode, originalUrl) {
+          const values = {};
+          const meta = (names) => {
+            for (const name of names) {
+              const node = documentNode.querySelector(`meta[property="${name}"], meta[name="${name}"], meta[itemprop="${name}"]`);
+              if (node?.content?.trim()) return node.content.trim();
+            }
+            return "";
+          };
+          const scripts = [...documentNode.querySelectorAll('script[type="application/ld+json"]')];
+          function findProduct(value) {
+            if (Array.isArray(value)) { for (const item of value) { const result = findProduct(item); if (result) return result; } }
+            else if (value && typeof value === "object") {
+              const types = Array.isArray(value["@type"]) ? value["@type"] : [value["@type"]];
+              if (types.includes("Product")) return value;
+              for (const child of Object.values(value)) { const result = findProduct(child); if (result) return result; }
+            }
+            return null;
+          }
+          let product = null;
+          for (const script of scripts) {
+            try { product = findProduct(JSON.parse(script.textContent)); if (product) break; } catch { /* Ignore malformed site metadata. */ }
+          }
+          const offer = Array.isArray(product?.offers) ? product.offers[0] : product?.offers;
+          const brand = typeof product?.brand === "string" ? product.brand : product?.brand?.name;
+          values.productName = product?.name || meta(["og:title", "twitter:title"]) || documentNode.querySelector("title")?.textContent?.trim() || "";
+          values.brandName = brand || meta(["product:brand", "brand"]);
+          values.imageUrl = (Array.isArray(product?.image) ? product.image[0] : product?.image) || meta(["og:image", "twitter:image"]);
+          values.shortDescription = product?.description || meta(["og:description", "description", "twitter:description"]);
+          values.currentPrice = offer?.price != null ? String(offer.price) : meta(["product:price:amount"]);
+          values.currency = offer?.priceCurrency || meta(["product:price:currency"]);
+          values.sku = product?.sku || product?.productID || "";
+          values.author = (Array.isArray(product?.author) ? product.author[0]?.name : product?.author?.name) || "";
+          values.publisher = product?.publisher?.name || "";
+          const availability = String(offer?.availability || "").toLowerCase();
+          values.availability = /instock/.test(availability) ? "in_stock" : /outofstock|soldout/.test(availability) ? "out_of_stock" : "unknown";
+          values.sourceWebsite = new URL(originalUrl).hostname;
+          return values;
+        }
+
+        async function fetchOne(rawUrl) {
+          const url = asUrl(rawUrl, { disallowCurrentOrigin: true });
+          if (!url) throw new Error("URL অবৈধ, credential/custom port-যুক্ত, অথবা বর্তমান site-এর URL।");
+          const host = url.hostname.toLowerCase();
+          if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") ||
+              /^(127\.|10\.|192\.168\.|169\.254\.|0\.|::1$|fc|fd|fe80)/i.test(host)) {
+            throw new Error("Local/private network host-এ fetch অনুমোদিত নয়।");
+          }
+          const response = await fetch(url.href, {
+            method: "GET", mode: "cors", credentials: "omit", redirect: "error",
+            referrerPolicy: "no-referrer", headers: { Accept: "text/html,application/xhtml+xml" },
+            signal: AbortSignal.timeout(12000),
+          });
+          if (!response.ok) throw new Error(`Website HTTP ${response.status} ফিরিয়েছে। Login/CAPTCHA/anti-bot bypass করা হবে না।`);
+          const finalUrl = asUrl(response.url, { disallowCurrentOrigin: true });
+          if (!finalUrl) throw new Error("Redirect-এর পরে URL নিরাপদ HTTP/HTTPS destination নয়।");
+          const contentType = response.headers.get("content-type") || "";
+          if (!contentType.toLowerCase().includes("text/html")) throw new Error(`HTML পেজ নয় (${contentType || "Content-Type অনুপস্থিত"})।`);
+          const reader = response.body?.getReader();
+          if (!reader) throw new Error("পেজের body পড়া যায়নি।");
+          const chunks = [];
+          let bytes = 0;
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            bytes += value.byteLength;
+            if (bytes > 1_000_000) { await reader.cancel(); throw new Error("পেজ 1 MB সীমা ছাড়িয়েছে; নিরাপত্তার জন্য fetch বন্ধ।"); }
+            chunks.push(value);
+          }
+          const joined = new Uint8Array(bytes);
+          let offset = 0;
+          for (const chunk of chunks) { joined.set(chunk, offset); offset += chunk.length; }
+          const html = new TextDecoder().decode(joined);
+          const parsed = new DOMParser().parseFromString(html, "text/html");
+          return { values: extractMetadata(parsed, finalUrl.href), finalUrl: finalUrl.href };
+        }
+
+        async function fetchProducts() {
+          if (fetchBusy) return;
+          const urls = $("bulk-urls").value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+          if (!urls.length) { showToast("প্রথমে এক বা একাধিক product URL দিন।", "warning"); return; }
+          fetchBusy = true;
+          $("fetch-button").disabled = true;
+          const report = [];
+          for (const raw of urls.slice(0, 10)) {
+            try {
+              const { values, finalUrl } = await fetchOne(raw);
+              const product = { ...emptyProduct(), ...values, originalProductUrl: raw, slug: uniqueSlug(slugify(values.productName)), dataStatus: "needs_review" };
+              products.unshift(product);
+              report.push(`✓ ${values.productName || "(title unavailable)"} — metadata candidates added; verify manually. ${finalUrl}`);
+            } catch (error) {
+              const item = { ...emptyProduct(), originalProductUrl: raw, slug: uniqueSlug(slugify("")), sourceWebsite: asUrl(raw)?.hostname || "", dataStatus: "needs_review" };
+              products.unshift(item);
+              const reason = error && typeof error === "object" && typeof error.message === "string" ? error.message : "Fetch ব্যর্থ";
+              report.push(`✗ ${raw} — ${reason}; manual entry/import করুন।`);
+            }
+            persist();
+            if (urls.length > 1) await new Promise((resolve) => setTimeout(resolve, 1200));
+          }
+          if (urls.length > 10) report.push(`সীমা: এই run-এ প্রথম ১০টি URL পরীক্ষা করা হয়েছে; বাকি ${urls.length - 10}টি পরে চালান।`);
+          $("fetch-report").textContent = report.join("\n");
+          $("fetch-report").style.whiteSpace = "pre-wrap";
+          $("fetch-button").disabled = false;
+          fetchBusy = false;
+          $("bulk-urls").value = "";
+          showToast("Fetch শেষ। Imported metadata candidate; প্রকাশের আগে যাচাই করুন।", "warning");
+        }
+
+        function addBulkUrls() {
+          const urls = $("bulk-urls").value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+          if (!urls.length) { showToast("প্রথমে URL দিন।", "warning"); return; }
+          let added = 0, skipped = 0;
+          for (const raw of urls) {
+            if (!asUrl(raw)) { skipped++; continue; }
+            const candidate = { ...emptyProduct(), originalProductUrl: raw, slug: uniqueSlug(slugify("")), sourceWebsite: asUrl(raw).hostname, dataStatus: "pending" };
+            if (findDuplicates(candidate).length) { skipped++; continue; }
+            products.unshift({ ...candidate, id: makeId() });
+            added++;
+          }
+          persist();
+          $("bulk-urls").value = "";
+          showToast(`${added}টি URL draft যোগ, ${skipped}টি invalid/duplicate বাদ।`, skipped ? "warning" : "info");
+        }
+
+        function showValidationReport() {
+          const body = $("report-body");
+          body.replaceChildren();
+          let issueCount = 0;
+          for (const product of products) {
+            const issues = warnings(product);
+            if (!issues.length) continue;
+            issueCount++;
+            const section = document.createElement("section");
+            section.style.cssText = "border-bottom:1px solid #e8eef5;padding:10px 0";
+            const title = document.createElement("strong");
+            title.textContent = product.productName || product.originalProductUrl || "(নামহীন পণ্য)";
+            const list = document.createElement("ul");
+            list.className = "validation-list";
+            issues.forEach((issue) => { const li = document.createElement("li"); li.textContent = issue; list.append(li); });
+            section.append(title, list);
+            body.append(section);
+          }
+          $("report-summary").textContent = `${products.length}টি পণ্যের মধ্যে ${issueCount}টিতে সতর্কতা আছে। Validation নিজে থেকে কোনো তথ্যকে verified করে না।`;
+          if (!issueCount) body.textContent = "কোনো validation warning পাওয়া যায়নি।";
+          reportDialog.showModal();
+        }
+
+        async function handleImportFile(event) {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (!file) return;
+          if (file.size > 5_000_000) { showToast("Import file সর্বোচ্চ 5 MB হতে পারে।", "error"); return; }
+          try {
+            const items = parseImport(await file.text(), file.name);
+            if (!items.length) throw new Error("File-এ কোনো product row পাওয়া যায়নি।");
+            openImportPreview(items);
+          } catch (error) {
+            showToast(`Import পড়া যায়নি: ${error instanceof Error ? error.message : "অজানা format"}`, "error");
+          }
+        }
+
+        function restoreBackup(event) {
+          const file = event.target.files?.[0];
+          event.target.value = "";
+          if (!file) return;
+          if (file.size > 5_000_000) { showToast("Backup সর্বোচ্চ 5 MB হতে পারে।", "error"); return; }
+          file.text().then((text) => {
+            const parsed = JSON.parse(text.replace(/^\uFEFF/, ""));
+            const items = Array.isArray(parsed) ? parsed : parsed?.products;
+            if (!Array.isArray(items)) throw new Error("Backup-এ product list নেই।");
+            const normalized = items.map(normalizeProduct).filter(Boolean);
+            if (!confirm(`${normalized.length}টি backup item বর্তমান ${products.length}টি item-এর সঙ্গে merge হবে। Duplicate row skip হবে; কোনো existing row overwrite হবে না। চালাবেন?`)) return;
+            const additions = [];
+            let duplicates = 0;
+            for (const item of normalized) {
+              if (findDuplicates(item).length || products.some((existing) => existing.id === item.id)) { duplicates++; continue; }
+              additions.push(item);
+            }
+            products = [...additions, ...products];
+            persist();
+            showToast(`Restore: ${additions.length}টি যোগ, ${duplicates}টি duplicate বাদ।`, duplicates ? "warning" : "info");
+          }).catch((error) => showToast(`Backup restore ব্যর্থ: ${error instanceof Error ? error.message : "অবৈধ JSON"}`, "error"));
+        }
+
+        $("add-button").addEventListener("click", () => openEditor());
+        $("product-form").addEventListener("submit", saveForm);
+        $("close-editor").addEventListener("click", () => editor.close());
+        $("cancel-editor").addEventListener("click", () => editor.close());
+        $("delete-from-editor").addEventListener("click", () => { const id = $("record-id").value; editor.close(); deleteProduct(id); });
+        $("imageUrl").addEventListener("input", updateImagePreview);
+        $("import-file").addEventListener("change", handleImportFile);
+        $("restore-file").addEventListener("change", restoreBackup);
+        $("close-import").addEventListener("click", () => importDialog.close());
+        $("cancel-import").addEventListener("click", () => importDialog.close());
+        $("confirm-import").addEventListener("click", confirmImport);
+        $("close-report").addEventListener("click", () => reportDialog.close());
+        $("report-ok").addEventListener("click", () => reportDialog.close());
+        $("backup-button").addEventListener("click", () => exportJson("sikkha-nogori-backup.json"));
+        $("export-json-button").addEventListener("click", () => exportJson());
+        $("export-csv-button").addEventListener("click", exportCsv);
+        $("fetch-button").addEventListener("click", fetchProducts);
+        $("bulk-add-button").addEventListener("click", addBulkUrls);
+        $("validate-all-button").addEventListener("click", showValidationReport);
+        $("previous-page").addEventListener("click", () => { currentPage = Math.max(1, currentPage - 1); render(); });
+        $("next-page").addEventListener("click", () => { currentPage++; render(); });
+        for (const id of ["search-input", "filter-category", "filter-brand", "filter-type", "filter-status", "sort-select", "page-size"]) {
+          $(id).addEventListener("input", () => { currentPage = 1; render(); });
+          $(id).addEventListener("change", () => { currentPage = 1; render(); });
+        }
+        $("productName").addEventListener("input", () => {
+          if (!$("record-id").value && !$("slug").value) $("slug").value = slugify($("productName").value);
+        });
+        render();
+      })();
+    </script>
+  </body>
+</html>

@@ -39,14 +39,14 @@ a{overflow-wrap:anywhere}.hidden{display:none}
  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 
  function parseCSV(text){
-  text=text.replace(/^\\uFEFF/,'');
+  text=text.replace(/^\uFEFF/,'');
   const out=[];let row=[],field='',quoted=false;
   for(let i=0;i<text.length;i++){
    const ch=text[i],next=text[i+1];
    if(quoted){if(ch==='"'&&next==='"'){field+='"';i++}else if(ch==='"')quoted=false;else field+=ch}
    else if(ch==='"'&&field==='')quoted=true;
    else if(ch===','){row.push(field);field=''}
-   else if(ch==='\\n'||ch==='\\r'){if(ch==='\\r'&&next==='\\n')i++;row.push(field);if(row.some(v=>v.trim()!==''))out.push(row);row=[];field=''}
+   else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&next==='\n')i++;row.push(field);if(row.some(v=>v.trim()!==''))out.push(row);row=[];field=''}
    else field+=ch;
   }
   if(field!==''||row.length){row.push(field);if(row.some(v=>v.trim()!==''))out.push(row)}
@@ -56,7 +56,7 @@ a{overflow-wrap:anywhere}.hidden{display:none}
  }
  function csvTemplate(){
   const cols=['productName','author','imageUrl','currentPrice','previousPrice','originalProductUrl','publisher','isbn','shortDescription','sourceWebsite','dataStatus'];
-  download('\\ufeff'+cols.join(',')+'\\r\\n'+'নমুনা বই,লেখকের নাম,https://example.com/book.jpg,250,300,https://www.rokomari.com/book/123,প্রকাশক,ISBN123,বইয়ের সংক্ষিপ্ত বিবরণ,Rokomari,manual\\r\\n','sikkha-nogori-book-template.csv','text/csv;charset=utf-8');
+  download('\ufeff'+cols.join(',')+'\r\n'+'নমুনা বই,লেখকের নাম,https://example.com/book.jpg,250,300,https://www.rokomari.com/book/123,প্রকাশক,ISBN123,বইয়ের সংক্ষিপ্ত বিবরণ,Rokomari,manual\r\n','sikkha-nogori-book-template.csv','text/csv;charset=utf-8');
  }
  $('sampleCsv').addEventListener('click',csvTemplate);
  $('importCsv').addEventListener('click',async()=>{

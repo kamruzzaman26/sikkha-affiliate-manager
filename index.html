@@ -56,7 +56,7 @@ a{overflow-wrap:anywhere}.hidden{display:none}
   return out.map(cols=>Object.fromEntries(headers.map((h,i)=>[h,(cols[i]||'').trim()])));
  }
  function csvTemplate(){
-  const cols=['productName','author','imageUrl','currentPrice','previousPrice','originalProductUrl','affiliateUrl','publisher','isbn','shortDescription','sourceWebsite','dataStatus'];
+  const cols=['productName','author','publisher','currentPrice','previousPrice','imageUrl','originalProductUrl','affiliateUrl','category','isbn','shortDescription','sourceWebsite','dataStatus','sourceNote','rankInSource'];
   download('\ufeff'+cols.join(',')+'\r\n'+'নমুনা বই,লেখকের নাম,https://example.com/book.jpg,250,300,https://www.rokomari.com/book/123,প্রকাশক,ISBN123,বইয়ের সংক্ষিপ্ত বিবরণ,Rokomari,manual\r\n','sikkha-nogori-book-template.csv','text/csv;charset=utf-8');
  }
  $('sampleCsv').addEventListener('click',csvTemplate);
@@ -94,8 +94,9 @@ a{overflow-wrap:anywhere}.hidden{display:none}
     currentPrice:['currentPrice','current_price','price','দাম','বর্তমান দাম','বিক্রয়মূল্য','বিক্রয়মূল্য'],
     previousPrice:['previousPrice','previous_price','oldPrice','আগের দাম','পূর্বের দাম'],
     originalProductUrl:['originalProductUrl','original_product_url','productUrl','product_url','product_url','url','link','পণ্যের লিংক','বইয়ের লিংক','বইয়ের লিংক','লিংক','URL'],
-    publisher:['publisher','প্রকাশক'],isbn:['isbn','ISBN'],
+    publisher:['publisher','brand_or_publisher','brandOrPublisher','প্রকাশক','প্রকাশনী'],isbn:['isbn','ISBN'],
     shortDescription:['shortDescription','description','বিবরণ','সংক্ষিপ্ত বিবরণ'],
+    sourceNote:['source_note','sourceNote','নোট','উৎসের নোট'],category:['category','book_category','ক্যাটাগরি','বিভাগ'],rankInSource:['rank_in_homepage_list','rankInHomepageList','rank','ক্রমিক'],
     affiliateUrl:['affiliateUrl','affiliate_url','affiliate link','অ্যাফিলিয়েট লিংক'],
     sourceWebsite:['sourceWebsite','source_website','source','উৎস'],
     dataStatus:['dataStatus','data_status','status','স্ট্যাটাস']
@@ -104,7 +105,9 @@ a{overflow-wrap:anywhere}.hidden{display:none}
    const mapHeaders=Object.keys(records[0]).reduce((acc,h)=>{const key=Object.keys(aliases).find(k=>aliases[k].some(a=>normalize(a)===normalize(h)));if(key)acc[h]=key;return acc},{});
    const mapped=records.map(row=>{const p={};Object.entries(row).forEach(([h,v])=>{const k=mapHeaders[h];if(k)p[k]=String(v??'').trim()});return p});
    if(!Object.values(mapHeaders).includes('productName')||!Object.values(mapHeaders).includes('originalProductUrl'))throw Error('বইয়ের নাম ও পণ্যের লিংক কলাম শনাক্ত হয়নি। ফাইলে পাওয়া header: '+Object.keys(records[0]).join(', ')+'। প্রয়োজন: book_title এবং product_url (অথবা productName এবং originalProductUrl)।');
-   const valid=mapped.filter(p=>p.productName&&p.originalProductUrl).map(p=>({...p,sourceWebsite:p.sourceWebsite||'Rokomari',dataStatus:p.dataStatus||'file-import',_selected:true}));
+   const valid=mapped.filter(p=>p.productName&&p.originalProductUrl).map(p=>({...p,productName:String(p.productName||'').trim(),originalProductUrl:String(p.originalProductUrl||'').trim(),sourceWebsite:p.sourceWebsite||'Rokomari',dataStatus:p.dataStatus||'Firecrawl/file import — যাচাই প্রয়োজন',affiliateUrl:p.affiliateUrl||'',category:p.category||'ইসলামিক বই',sourceNote:p.sourceNote||'',rankInSource:p.rankInSource||'',_selected:true}));
+   const seen=new Set();let duplicateCount=0;
+   const unique=valid.filter(p=>{let key=p.originalProductUrl.split('#')[0].replace(/\/$/,'').toLowerCase();if(seen.has(key)){duplicateCount++;return false}seen.add(key);return true});
    if(!valid.length)throw Error('বইয়ের নাম ও পণ্যের লিংকসহ কোনো বৈধ row পাওয়া যায়নি।');
    products=valid;$('results').classList.remove('hidden');
    render({products,discoveredCount:records.length,candidateCount:records.length,attemptedCount:valid.length,failedCount:records.length-valid.length,duplicateCount:0,warnings:['ফাইল থেকে ডেটা আনা হয়েছে। ছবি, দাম ও পণ্যের লিংক যাচাই করুন।']});
@@ -129,7 +132,7 @@ a{overflow-wrap:anywhere}.hidden{display:none}
   catch(e){$('error').textContent=`Import ব্যর্থ: ${e.message}. Rokomari সরাসরি অনুরোধ ব্লক করলে CSV Import ব্যবহার করুন।`; $('error').classList.remove('hidden')}
   finally{$('run').disabled=false;$('run').textContent='ক্যাটাগরি সংগ্রহ শুরু'}
  });
- $('csv').addEventListener('click',()=>{const ps=selected(),cols=['productName','author','imageUrl','currentPrice','previousPrice','originalProductUrl','affiliateUrl','publisher','isbn','shortDescription','sourceWebsite','dataStatus'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';download('\ufeff'+[cols.join(','),...ps.map(p=>cols.map(k=>q(p[k])).join(','))].join('\r\n'),'rokomari-products.csv','text/csv;charset=utf-8')});
+ $('csv').addEventListener('click',()=>{const ps=selected(),cols=['productName','author','publisher','currentPrice','previousPrice','imageUrl','originalProductUrl','affiliateUrl','category','isbn','shortDescription','sourceWebsite','dataStatus','sourceNote','rankInSource'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';download('\ufeff'+[cols.join(','),...ps.map(p=>cols.map(k=>q(p[k])).join(','))].join('\r\n'),'rokomari-products.csv','text/csv;charset=utf-8')});
  $('json').addEventListener('click',()=>download(JSON.stringify(selected().map(({_selected,...p})=>p),null,2),'rokomari-products.json','application/json;charset=utf-8'));
 })();
 </script></body></html>

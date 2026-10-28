@@ -70,7 +70,21 @@ a{overflow-wrap:anywhere}.hidden{display:none}
     const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
     const first=wb.Sheets[wb.SheetNames[0]];
     if(!first)throw Error('Excel ফাইলে কোনো worksheet পাওয়া যায়নি।');
-    records=XLSX.utils.sheet_to_json(first,{defval:'',raw:false});
+    const grid=XLSX.utils.sheet_to_json(first,{header:1,defval:'',raw:false});
+    const normHeader=s=>String(s??'').trim().toLowerCase().replace(/[\\s_-]+/g,'');
+    const titleHeads=['booktitle','bookname','productname','title','বইয়েরনাম','বইয়েরনাম','পণ্যেরনাম','নাম'];
+    const urlHeads=['producturl','originalproducturl','url','link','বইয়েরলিংক','বইয়েরলিংক','পণ্যেরলিংক','লিংক','affiliateurl','affiliate_url'];
+    let headerIndex=-1;
+    for(let i=0;i<Math.min(grid.length,30);i++){
+      const cells=grid[i].map(normHeader);
+      if(cells.some(h=>titleHeads.includes(h)) && cells.some(h=>urlHeads.includes(h))){headerIndex=i;break;}
+    }
+    if(headerIndex<0){
+      const preview=grid.slice(0,8).map((row,i)=>'Row '+(i+1)+': '+row.map(v=>String(v??'')).join(' | ')).join(' ; ');
+      throw Error('Excel-এর প্রথম ৩০টি row-তে বইয়ের নাম ও পণ্যের URL-এর header একসঙ্গে পাওয়া যায়নি। শুরুর অংশ: '+preview);
+    }
+    const headers=grid[headerIndex].map(v=>String(v??'').trim());
+    records=grid.slice(headerIndex+1).filter(row=>row.some(v=>String(v??'').trim()!=='')).map(row=>Object.fromEntries(headers.map((h,i)=>[h,String(row[i]??'').trim()])));
    }else records=parseCSV(await file.text());
    if(!records.length)throw Error('ফাইলে কোনো ডেটা পাওয়া যায়নি।');
    const aliases={

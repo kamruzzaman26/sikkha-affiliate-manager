@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
 
   const body = req.body || {};
   const categoryUrl = String(body.categoryUrl || "").trim();
-  const limit = Math.max(1, Math.min(20, Number(body.limit) || 10));
+  const limit = Math.max(1, Math.min(5, Number(body.limit) || 3));
 
   let parsed;
   try { parsed = new URL(categoryUrl); } catch (_) {
@@ -37,7 +37,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const map = await firecrawl("/map", { url: parsed.toString(), limit: 200, includeSubdomains: false });
+    const map = await firecrawl("/map", { url: parsed.toString(), limit: 30, includeSubdomains: false });
     const links = Array.isArray(map.links) ? map.links : [];
     const candidates = [...new Set(links.map(item => typeof item === "string" ? item : item.url)
       .filter(Boolean).map(value => {

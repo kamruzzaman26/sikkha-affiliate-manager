@@ -89,7 +89,7 @@ a{overflow-wrap:anywhere}.hidden{display:none}
    const normalize=s=>String(s??'').trim().toLowerCase().replace(/[\s_-]+/g,'');
    const mapHeaders=Object.keys(records[0]).reduce((acc,h)=>{const key=Object.keys(aliases).find(k=>aliases[k].some(a=>normalize(a)===normalize(h)));if(key)acc[h]=key;return acc},{});
    const mapped=records.map(row=>{const p={};Object.entries(row).forEach(([h,v])=>{const k=mapHeaders[h];if(k)p[k]=String(v??'').trim()});return p});
-   if(!Object.values(mapHeaders).includes('productName')||!Object.values(mapHeaders).includes('originalProductUrl'))throw Error('বইয়ের নাম এবং পণ্যের লিংক—দুটি কলাম দরকার। নমুনা CSV-তে সঠিক header দেখুন।');
+   if(!Object.values(mapHeaders).includes('productName')||!Object.values(mapHeaders).includes('originalProductUrl'))throw Error('বইয়ের নাম ও পণ্যের লিংক কলাম শনাক্ত হয়নি। ফাইলে পাওয়া header: '+Object.keys(records[0]).join(', ')+'। প্রয়োজন: book_title এবং product_url (অথবা productName এবং originalProductUrl)।');
    const valid=mapped.filter(p=>p.productName&&p.originalProductUrl).map(p=>({...p,sourceWebsite:p.sourceWebsite||'Rokomari',dataStatus:p.dataStatus||'file-import',_selected:true}));
    if(!valid.length)throw Error('বইয়ের নাম ও পণ্যের লিংকসহ কোনো বৈধ row পাওয়া যায়নি।');
    products=valid;$('results').classList.remove('hidden');

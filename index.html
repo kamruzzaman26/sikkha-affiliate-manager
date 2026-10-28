@@ -16,9 +16,9 @@ a{overflow-wrap:anywhere}.hidden{display:none}
 </style>
 </head>
 <body><main class="wrap">
-<header><p style="color:#2463eb;font-weight:700;margin-bottom:4px">শিক্ষা নগরী · বইয়ের তথ্য ব্যবস্থাপনা</p><h1>বইয়ের তথ্য Import ও Export</h1><p class="muted">CSV ফাইল থেকে একসঙ্গে অনেক বই যোগ করুন, তথ্য যাচাই করুন, তারপর CSV বা JSON ডাউনলোড করুন। এই পদ্ধতি নিজে থেকে Rokomari থেকে তথ্য সংগ্রহ করে না।</p></header>
+<header><p style="color:#2463eb;font-weight:700;margin-bottom:4px">শিক্ষা নগরী · বইয়ের তথ্য ব্যবস্থাপনা</p><h1>বইয়ের তথ্য Import ও Export</h1><p class="muted">CSV, Excel (.xlsx) বা পুরোনো Excel (.xls) ফাইল আপলোড করে একসঙ্গে অনেক বই যোগ করুন। তথ্য যাচাই করে CSV বা JSON ডাউনলোড করুন। এটি নিজে থেকে Rokomari থেকে তথ্য সংগ্রহ করে না।</p></header>
 <section class="card">
-<h2 style="font-size:18px;margin-top:0">CSV/Excel থেকে বই যোগ করুন</h2><p class="muted">Excel-এ ফাইল খুলে CSV UTF-8 হিসেবে Save করুন। এরপর এখানে CSV ফাইল বেছে নিন।</p><label for="csvFile">CSV ফাইল নির্বাচন</label><input id="csvFile" type="file" accept=".csv,text/csv"><div style="margin-top:8px"><button id="importCsv" class="primary">CSV Import</button><button id="sampleCsv">নমুনা CSV ডাউনলোড</button></div><div id="csvMessage" class="alert hidden" role="status"></div>
+<h2 style="font-size:18px;margin-top:0">CSV / Excel Spreadsheet Upload</h2><p class="muted">.csv, .xlsx অথবা .xls ফাইল নির্বাচন করুন। প্রথম row-তে column header থাকতে হবে।</p><label for="csvFile">CSV / Excel ফাইল নির্বাচন</label><input id="csvFile" type="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"><div style="margin-top:8px"><button id="importCsv" class="primary">ফাইল Import করুন</button><button id="sampleCsv">নমুনা CSV ডাউনলোড</button></div><div id="csvMessage" class="alert hidden" role="status"></div>
 </section>
 <section class="card">
 <label for="url">Rokomari category URL (ঐচ্ছিক; সার্ভার অনুমতি দিলে)</label><input id="url" value="https://www.rokomari.com/book/category/81/islamic-books" placeholder="https://www.rokomari.com/book/category/...">
@@ -33,6 +33,7 @@ a{overflow-wrap:anywhere}.hidden{display:none}
 </section>
 <footer class="muted">মূল affiliate manager-এ স্বয়ংক্রিয়ভাবে data write করে না। Export করা তথ্য যাচাই করে পরে import করুন।</footer>
 </main>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 (() => {
  const $=id=>document.getElementById(id); let products=[];
@@ -61,22 +62,40 @@ a{overflow-wrap:anywhere}.hidden{display:none}
  $('sampleCsv').addEventListener('click',csvTemplate);
  $('importCsv').addEventListener('click',async()=>{
   const file=$('csvFile').files[0],msg=$('csvMessage');msg.classList.remove('hidden','error');
-  if(!file){msg.textContent='আগে একটি CSV ফাইল নির্বাচন করুন।';msg.classList.remove('hidden');return}
+  if(!file){msg.textContent='আগে একটি CSV বা Excel ফাইল নির্বাচন করুন।';msg.classList.remove('hidden');return}
   try{
-   const records=parseCSV(await file.text());
-   if(!records.length)throw Error('CSV ফাইলে কোনো ডেটা পাওয়া যায়নি।');
-   const required=['productName','originalProductUrl'];
-   const headers=Object.keys(records[0]);
-   const missing=required.filter(h=>!headers.includes(h));
-   if(missing.length)throw Error('প্রয়োজনীয় কলাম নেই: '+missing.join(', ')+'. নমুনা CSV ডাউনলোড করে সেই কলাম নাম ব্যবহার করুন।');
-   const valid=records.filter(p=>p.productName&&p.originalProductUrl).map(p=>({...p,sourceWebsite:p.sourceWebsite||'Rokomari',dataStatus:p.dataStatus||'csv-import',_selected:true}));
-   if(!valid.length)throw Error('বইয়ের নাম ও originalProductUrl-সহ কোনো বৈধ row পাওয়া যায়নি।');
+   let records=[];
+   if(/\.xlsx?$/i.test(file.name)){
+    if(!window.XLSX)throw Error('Excel reader লোড হয়নি। ইন্টারনেট সংযোগ পরীক্ষা করুন অথবা ফাইলটি CSV UTF-8 হিসেবে Save করুন।');
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+    const first=wb.Sheets[wb.SheetNames[0]];
+    if(!first)throw Error('Excel ফাইলে কোনো worksheet পাওয়া যায়নি।');
+    records=XLSX.utils.sheet_to_json(first,{defval:'',raw:false});
+   }else records=parseCSV(await file.text());
+   if(!records.length)throw Error('ফাইলে কোনো ডেটা পাওয়া যায়নি।');
+   const aliases={
+    productName:['productName','product_name','title','bookName','book_name','বইয়ের নাম','বইয়ের নাম','নাম','শিরোনাম','পণ্যের নাম'],
+    author:['author','writer','লেখক','লেখকের নাম'],
+    imageUrl:['imageUrl','image_url','image','cover','coverImage','ছবির URL','ছবির লিংক','ছবি','কভার'],
+    currentPrice:['currentPrice','current_price','price','দাম','বর্তমান দাম','বিক্রয়মূল্য','বিক্রয়মূল্য'],
+    previousPrice:['previousPrice','previous_price','oldPrice','আগের দাম','পূর্বের দাম'],
+    originalProductUrl:['originalProductUrl','original_product_url','productUrl','product_url','url','link','পণ্যের লিংক','বইয়ের লিংক','বইয়ের লিংক','লিংক','URL'],
+    publisher:['publisher','প্রকাশক'],isbn:['isbn','ISBN'],
+    shortDescription:['shortDescription','description','বিবরণ','সংক্ষিপ্ত বিবরণ'],
+    sourceWebsite:['sourceWebsite','source_website','source','উৎস'],
+    dataStatus:['dataStatus','data_status','status','স্ট্যাটাস']
+   };
+   const normalize=s=>String(s??'').trim().toLowerCase().replace(/[\s_-]+/g,'');
+   const mapHeaders=Object.keys(records[0]).reduce((acc,h)=>{const key=Object.keys(aliases).find(k=>aliases[k].some(a=>normalize(a)===normalize(h)));if(key)acc[h]=key;return acc},{});
+   const mapped=records.map(row=>{const p={};Object.entries(row).forEach(([h,v])=>{const k=mapHeaders[h];if(k)p[k]=String(v??'').trim()});return p});
+   if(!Object.values(mapHeaders).includes('productName')||!Object.values(mapHeaders).includes('originalProductUrl'))throw Error('বইয়ের নাম এবং পণ্যের লিংক—দুটি কলাম দরকার। নমুনা CSV-তে সঠিক header দেখুন।');
+   const valid=mapped.filter(p=>p.productName&&p.originalProductUrl).map(p=>({...p,sourceWebsite:p.sourceWebsite||'Rokomari',dataStatus:p.dataStatus||'file-import',_selected:true}));
+   if(!valid.length)throw Error('বইয়ের নাম ও পণ্যের লিংকসহ কোনো বৈধ row পাওয়া যায়নি।');
    products=valid;$('results').classList.remove('hidden');
-   render({products,discoveredCount:records.length,candidateCount:records.length,attemptedCount:valid.length,failedCount:records.length-valid.length,duplicateCount:0,warnings:['CSV থেকে ডেটা আনা হয়েছে। ছবি/দাম/লিংক সঠিক কি না যাচাই করুন।']});
+   render({products,discoveredCount:records.length,candidateCount:records.length,attemptedCount:valid.length,failedCount:records.length-valid.length,duplicateCount:0,warnings:['ফাইল থেকে ডেটা আনা হয়েছে। ছবি, দাম ও পণ্যের লিংক যাচাই করুন।']});
    msg.textContent=valid.length+'টি বই সফলভাবে টেবিলে যোগ হয়েছে।';msg.classList.remove('hidden');
-  }catch(e){msg.textContent='CSV Import ব্যর্থ: '+e.message;msg.classList.remove('hidden');msg.classList.add('error')}
+  }catch(e){msg.textContent='ফাইল Import ব্যর্থ: '+e.message;msg.classList.remove('hidden');msg.classList.add('error')}
  });
-
  function selected(){return products.filter(p=>p._selected!==false)}
  function download(content,name,type){const blob=new Blob([content],{type});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
  function render(data){

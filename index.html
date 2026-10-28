@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rokomari Firecrawl Importer | শিক্ষা নগরী</title>
+<title>বইয়ের CSV Importer | শিক্ষা নগরী</title>
 <style>
 :root{font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif;color:#182230;background:#f6f8fb}
 body{margin:0;padding:18px}.wrap{max-width:1150px;margin:auto}.card{background:#fff;border:1px solid #dbe2ea;border-radius:14px;padding:16px;margin:14px 0}
@@ -16,12 +16,15 @@ a{overflow-wrap:anywhere}.hidden{display:none}
 </style>
 </head>
 <body><main class="wrap">
-<header><p style="color:#2463eb;font-weight:700;margin-bottom:4px">শিক্ষা নগরী · Firecrawl-only</p><h1>Rokomari Category Importer</h1><p class="muted">এটি index.html frontend। তথ্য সংগ্রহের জন্য আলাদা secure server API route দরকার; Firecrawl API key এখানে রাখা যাবে না।</p></header>
+<header><p style="color:#2463eb;font-weight:700;margin-bottom:4px">শিক্ষা নগরী · বইয়ের তথ্য ব্যবস্থাপনা</p><h1>বইয়ের তথ্য Import ও Export</h1><p class="muted">CSV ফাইল থেকে একসঙ্গে অনেক বই যোগ করুন, তথ্য যাচাই করুন, তারপর CSV বা JSON ডাউনলোড করুন। এই পদ্ধতি নিজে থেকে Rokomari থেকে তথ্য সংগ্রহ করে না।</p></header>
 <section class="card">
-<label for="url">Rokomari category URL</label><input id="url" value="https://www.rokomari.com/book/category/81/islamic-books" placeholder="https://www.rokomari.com/book/category/...">
-<label for="limit">সর্বোচ্চ product page (১–৩০)</label><input id="limit" type="number" min="1" max="30" value="20" style="width:130px">
+<h2 style="font-size:18px;margin-top:0">CSV/Excel থেকে বই যোগ করুন</h2><p class="muted">Excel-এ ফাইল খুলে CSV UTF-8 হিসেবে Save করুন। এরপর এখানে CSV ফাইল বেছে নিন।</p><label for="csvFile">CSV ফাইল নির্বাচন</label><input id="csvFile" type="file" accept=".csv,text/csv"><div style="margin-top:8px"><button id="importCsv" class="primary">CSV Import</button><button id="sampleCsv">নমুনা CSV ডাউনলোড</button></div><div id="csvMessage" class="alert hidden" role="status"></div>
+</section>
+<section class="card">
+<label for="url">Rokomari category URL (ঐচ্ছিক; সার্ভার অনুমতি দিলে)</label><input id="url" value="https://www.rokomari.com/book/category/81/islamic-books" placeholder="https://www.rokomari.com/book/category/...">
+<label for="limit">সর্বোচ্চ product page (১–২০)</label><input id="limit" type="number" min="1" max="20" value="20" style="width:130px">
 <div style="margin-top:12px"><button class="primary" id="run">ক্যাটাগরি সংগ্রহ শুরু</button><button id="csv" disabled>CSV Export</button><button id="json" disabled>JSON Export</button></div>
-<p class="muted">API key server-side .env.local-এ থাকবে। Firecrawl Map সব pagination খুঁজে পাবে—এমন নিশ্চয়তা নেই।</p>
+<p class="muted">Rokomari সার্ভার সরাসরি অনুরোধ ব্লক করলে CSV Import ব্যবহার করুন। কোনো API key এই পেজে প্রয়োজন নেই।</p>
 <div id="error" class="alert error hidden" role="alert"></div>
 </section>
 <section id="results" class="hidden">
@@ -34,6 +37,46 @@ a{overflow-wrap:anywhere}.hidden{display:none}
 (() => {
  const $=id=>document.getElementById(id); let products=[];
  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+ function parseCSV(text){
+  text=text.replace(/^\\uFEFF/,'');
+  const out=[];let row=[],field='',quoted=false;
+  for(let i=0;i<text.length;i++){
+   const ch=text[i],next=text[i+1];
+   if(quoted){if(ch==='"'&&next==='"'){field+='"';i++}else if(ch==='"')quoted=false;else field+=ch}
+   else if(ch==='"'&&field==='')quoted=true;
+   else if(ch===','){row.push(field);field=''}
+   else if(ch==='\\n'||ch==='\\r'){if(ch==='\\r'&&next==='\\n')i++;row.push(field);if(row.some(v=>v.trim()!==''))out.push(row);row=[];field=''}
+   else field+=ch;
+  }
+  if(field!==''||row.length){row.push(field);if(row.some(v=>v.trim()!==''))out.push(row)}
+  if(!out.length)return [];
+  const headers=out.shift().map(h=>h.trim().replace(/^"|"$/g,''));
+  return out.map(cols=>Object.fromEntries(headers.map((h,i)=>[h,(cols[i]||'').trim()])));
+ }
+ function csvTemplate(){
+  const cols=['productName','author','imageUrl','currentPrice','previousPrice','originalProductUrl','publisher','isbn','shortDescription','sourceWebsite','dataStatus'];
+  download('\\ufeff'+cols.join(',')+'\\r\\n'+'নমুনা বই,লেখকের নাম,https://example.com/book.jpg,250,300,https://www.rokomari.com/book/123,প্রকাশক,ISBN123,বইয়ের সংক্ষিপ্ত বিবরণ,Rokomari,manual\\r\\n','sikkha-nogori-book-template.csv','text/csv;charset=utf-8');
+ }
+ $('sampleCsv').addEventListener('click',csvTemplate);
+ $('importCsv').addEventListener('click',async()=>{
+  const file=$('csvFile').files[0],msg=$('csvMessage');msg.classList.remove('hidden','error');
+  if(!file){msg.textContent='আগে একটি CSV ফাইল নির্বাচন করুন।';msg.classList.remove('hidden');return}
+  try{
+   const records=parseCSV(await file.text());
+   if(!records.length)throw Error('CSV ফাইলে কোনো ডেটা পাওয়া যায়নি।');
+   const required=['productName','originalProductUrl'];
+   const headers=Object.keys(records[0]);
+   const missing=required.filter(h=>!headers.includes(h));
+   if(missing.length)throw Error('প্রয়োজনীয় কলাম নেই: '+missing.join(', ')+'. নমুনা CSV ডাউনলোড করে সেই কলাম নাম ব্যবহার করুন।');
+   const valid=records.filter(p=>p.productName&&p.originalProductUrl).map(p=>({...p,sourceWebsite:p.sourceWebsite||'Rokomari',dataStatus:p.dataStatus||'csv-import',_selected:true}));
+   if(!valid.length)throw Error('বইয়ের নাম ও originalProductUrl-সহ কোনো বৈধ row পাওয়া যায়নি।');
+   products=valid;$('results').classList.remove('hidden');
+   render({products,discoveredCount:records.length,candidateCount:records.length,attemptedCount:valid.length,failedCount:records.length-valid.length,duplicateCount:0,warnings:['CSV থেকে ডেটা আনা হয়েছে। ছবি/দাম/লিংক সঠিক কি না যাচাই করুন।']});
+   msg.textContent=valid.length+'টি বই সফলভাবে টেবিলে যোগ হয়েছে।';msg.classList.remove('hidden');
+  }catch(e){msg.textContent='CSV Import ব্যর্থ: '+e.message;msg.classList.remove('hidden');msg.classList.add('error')}
+ });
+
  function selected(){return products.filter(p=>p._selected!==false)}
  function download(content,name,type){const blob=new Blob([content],{type});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}
  function render(data){
@@ -47,9 +90,9 @@ a{overflow-wrap:anywhere}.hidden{display:none}
  $('rows').addEventListener('input',e=>{const i=Number(e.target.dataset.i),f=e.target.dataset.f;if(f&&products[i])products[i][f]=e.target.value});
  $('rows').addEventListener('change',e=>{if(e.target.classList.contains('sel'))products[Number(e.target.dataset.i)]._selected=e.target.checked});
  $('run').addEventListener('click',async()=>{
-  $('error').classList.add('hidden');$('results').classList.add('hidden');$('run').disabled=true;$('run').textContent='Firecrawl চলছে…';
+  $('error').classList.add('hidden');$('results').classList.add('hidden');$('run').disabled=true;$('run').textContent='তথ্য আনা হচ্ছে…';
   try{const r=await fetch('/api/rokomari-import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({categoryUrl:$('url').value,limit:Number($('limit').value)})});const d=await r.json();if(!r.ok)throw Error(d.error||`HTTP ${r.status}`);render(d)}
-  catch(e){$('error').textContent=`Import ব্যর্থ: ${e.message}. এই index.html ফাইলটি শুধু frontend; এটি এমন project/server-এ চালাতে হবে যেখানে /api/rokomari-import route বসানো আছে।`; $('error').classList.remove('hidden')}
+  catch(e){$('error').textContent=`Import ব্যর্থ: ${e.message}. Rokomari সরাসরি অনুরোধ ব্লক করলে CSV Import ব্যবহার করুন।`; $('error').classList.remove('hidden')}
   finally{$('run').disabled=false;$('run').textContent='ক্যাটাগরি সংগ্রহ শুরু'}
  });
  $('csv').addEventListener('click',()=>{const ps=selected(),cols=['productName','author','imageUrl','currentPrice','previousPrice','originalProductUrl','publisher','isbn','shortDescription','sourceWebsite','dataStatus'];const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';download('\ufeff'+[cols.join(','),...ps.map(p=>cols.map(k=>q(p[k])).join(','))].join('\r\n'),'rokomari-products.csv','text/csv;charset=utf-8')});

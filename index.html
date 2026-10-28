@@ -72,7 +72,7 @@ a{overflow-wrap:anywhere}.hidden{display:none}
     if(!first)throw Error('Excel ফাইলে কোনো worksheet পাওয়া যায়নি।');
     const grid=XLSX.utils.sheet_to_json(first,{header:1,defval:'',raw:false});
     const normHeader=s=>String(s??'').trim().toLowerCase().replace(/[\\s_-]+/g,'');
-    const titleHeads=['booktitle','bookname','productname','title','বইয়েরনাম','বইয়েরনাম','পণ্যেরনাম','নাম'];
+    const titleHeads=['booktitle','bookname','productname','productnameinexport','homepagebestsellertitle','title','বইয়েরনাম','বইয়েরনাম','পণ্যেরনাম','নাম'];
     const urlHeads=['producturl','originalproducturl','url','link','বইয়েরলিংক','বইয়েরলিংক','পণ্যেরলিংক','লিংক','affiliateurl','affiliate_url'];
     let headerIndex=-1;
     for(let i=0;i<Math.min(grid.length,30);i++){
@@ -88,7 +88,7 @@ a{overflow-wrap:anywhere}.hidden{display:none}
    }else records=parseCSV(await file.text());
    if(!records.length)throw Error('ফাইলে কোনো ডেটা পাওয়া যায়নি।');
    const aliases={
-    productName:['productName','product_name','title','bookName','book_name','book_title','বইয়ের নাম','বইয়ের নাম','নাম','শিরোনাম','পণ্যের নাম'],
+    productName:['productName','product_name','title','bookName','book_name','book_title','product_name_in_export','homepage_best_seller_title','বইয়ের নাম','বইয়ের নাম','নাম','শিরোনাম','পণ্যের নাম'],
     author:['author','writer','লেখক','লেখকের নাম'],
     imageUrl:['imageUrl','image_url','image','cover','coverImage','ছবির URL','ছবির লিংক','ছবি','কভার'],
     currentPrice:['currentPrice','current_price','price','দাম','বর্তমান দাম','বিক্রয়মূল্য','বিক্রয়মূল্য'],

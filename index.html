@@ -109,9 +109,9 @@ a{overflow-wrap:anywhere}.hidden{display:none}
    const seen=new Set();let duplicateCount=0;
    const unique=valid.filter(p=>{let key=p.originalProductUrl.split('#')[0].replace(/\/$/,'').toLowerCase();if(seen.has(key)){duplicateCount++;return false}seen.add(key);return true});
    if(!valid.length)throw Error('বইয়ের নাম ও পণ্যের লিংকসহ কোনো বৈধ row পাওয়া যায়নি।');
-   products=valid;$('results').classList.remove('hidden');
-   render({products,discoveredCount:records.length,candidateCount:records.length,attemptedCount:valid.length,failedCount:records.length-valid.length,duplicateCount:0,warnings:['ফাইল থেকে ডেটা আনা হয়েছে। ছবি, দাম ও পণ্যের লিংক যাচাই করুন।']});
-   msg.textContent=valid.length+'টি বই সফলভাবে টেবিলে যোগ হয়েছে।';msg.classList.remove('hidden');
+   products=unique;$('results').classList.remove('hidden');
+   render({products,discoveredCount:records.length,candidateCount:records.length,attemptedCount:valid.length,failedCount:records.length-valid.length,duplicateCount,warnings:['ফাইল থেকে তথ্য নেওয়া হয়েছে। এটি নিজে থেকে অনুপস্থিত তথ্য ওয়েব থেকে সংগ্রহ করে না।','ছবি, দাম, লেখক ও মূল URL যাচাই করুন। অ্যাফিলিয়েট URL না থাকলে সেটি ফাঁকা থাকবে।']});
+   msg.textContent=unique.length+'টি বই টেবিলে যোগ হয়েছে। '+duplicateCount+'টি duplicate URL বাদ গেছে.';msg.classList.remove('hidden');
   }catch(e){msg.textContent='ফাইল Import ব্যর্থ: '+e.message;msg.classList.remove('hidden');msg.classList.add('error')}
  });
  function selected(){return products.filter(p=>p._selected!==false)}

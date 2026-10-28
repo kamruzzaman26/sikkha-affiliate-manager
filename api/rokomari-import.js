@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
   try { parsed = new URL(categoryUrl); } catch (_) {
     return res.status(400).json({ error: "সঠিক Rokomari category URL দিন।" });
   }
-  if (parsed.protocol !== "https:" || !/(^|\\.)rokomari\\.com$/i.test(parsed.hostname)) {
+  if (parsed.protocol !== "https:" || !/(^|\.)rokomari\.com$/i.test(parsed.hostname)) {
     return res.status(400).json({ error: "শুধু https://www.rokomari.com এর URL ব্যবহার করুন।" });
   }
 
@@ -46,8 +46,8 @@ module.exports = async function handler(req, res) {
         try {
           const u = new URL(value);
           return u.hostname === "www.rokomari.com" &&
-            /\\/book\\//i.test(u.pathname) &&
-            !/\\/book\\/category\\//i.test(u.pathname) &&
+            /\/book\//i.test(u.pathname) &&
+            !/\/book\/category\//i.test(u.pathname) &&
             !/[?&](sort|page|filter)=/i.test(u.search);
         } catch (_) { return false; }
       }))].slice(0, limit);
@@ -71,20 +71,20 @@ module.exports = async function handler(req, res) {
         const data = scraped.data || scraped;
         const markdown = String(data.markdown || data.content || "");
         const metadata = data.metadata || {};
-        const title = String(metadata.title || "").replace(/\\s*[|–-]\\s*Rokomari.*$/i, "").trim();
+        const title = String(metadata.title || "").replace(/\s*[|–-]\s*Rokomari.*$/i, "").trim();
         const pick = (patterns) => {
           for (const pattern of patterns) {
             const match = markdown.match(pattern);
-            if (match && match[1]) return match[1].replace(/\\s+/g, " ").trim().slice(0, 250);
+            if (match && match[1]) return match[1].replace(/\s+/g, " ").trim().slice(0, 250);
           }
           return "";
         };
-        const price = pick([/(?:বর্তমান মূল্য|দাম|Price|৳)\\s*[:：-]?\\s*(?:৳\\s*)?([0-9,]+(?:\\.[0-9]+)?)/i, /৳\\s*([0-9,]+(?:\\.[0-9]+)?)/]);
-        const author = pick([/(?:লেখক|Author)\\s*[:：-]?\\s*([^\\n|]+)/i]);
-        const publisher = pick([/(?:প্রকাশনী|প্রকাশক|Publisher)\\s*[:：-]?\\s*([^\\n|]+)/i]);
+        const price = pick([/(?:বর্তমান মূল্য|দাম|Price|৳)\s*[:：-]?\s*(?:৳\s*)?([0-9,]+(?:\.[0-9]+)?)/i, /৳\s*([0-9,]+(?:\.[0-9]+)?)/]);
+        const author = pick([/(?:লেখক|Author)\s*[:：-]?\s*([^\n|]+)/i]);
+        const publisher = pick([/(?:প্রকাশনী|প্রকাশক|Publisher)\s*[:：-]?\s*([^\n|]+)/i]);
         const imageUrl = String(metadata.ogImage || metadata.image || (Array.isArray(data.images) ? data.images[0] : "") || "");
         products.push({
-          productName: title || pick([/^#\\s+(.+)$/m]) || "",
+          productName: title || pick([/^#\s+(.+)$/m]) || "",
           author, publisher, imageUrl, currentPrice: price, previousPrice: "",
           originalProductUrl: url, isbn: "", shortDescription: "",
           sourceWebsite: "Rokomari", dataStatus: title ? "পৃষ্ঠা থেকে সংগ্রহ করা" : "তথ্য যাচাই প্রয়োজন"
